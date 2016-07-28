@@ -47,8 +47,14 @@ namespace Chess.ChessControl
                     //Checks if current line Places a pience on a square
                     if (commands[0] <= 90 && commands[0] >= 65)
                     {
-                        util.StorePiece(commands[0], commands[1], (commands[2] + "" + commands[3]));
-                        print.PrintCommand(util.Color, util.Piece, util.Square);
+                        util.StorePiece(commands[0], commands[1], (commands[2] + "" + commands[3]), "");
+                        print.PrintPlaceCommand(util.Color, util.Piece, util.Square1);
+                    }
+                    //Checks to see if it moves a piece on a square to another square.
+                    else if (commands[0] <= 122 && commands[0] >= 97)
+                    {
+                        util.StorePiece(' ', ' ', (commands[0] + "" + commands[1]), (commands[3] + "" + commands[4]));
+                        print.PrintMoveCommand(util.Square2);
                     }
                 }
             }
