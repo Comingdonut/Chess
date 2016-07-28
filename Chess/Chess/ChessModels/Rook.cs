@@ -10,6 +10,7 @@ namespace Chess.ChessModels
     {
         #region variables
         private char _piece;
+        private char _color;
         #endregion
         public void Movement()
         {
@@ -28,6 +29,21 @@ namespace Chess.ChessModels
                 if (value == 'R')
                 {
                     _piece = value;
+                }
+            }
+        }
+        public char Color
+        {
+            get
+            {
+                return _color;
+            }
+
+            set
+            {
+                if (value == 'l' || value == 'd')
+                {
+                    _color = value;
                 }
             }
         }
