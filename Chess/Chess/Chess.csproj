@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessModels\Bishop.cs" />
     <Compile Include="ChessModels\IChessPiece.cs" />
     <Compile Include="ChessModels\King.cs" />
+    <Compile Include="ChessModels\Knight.cs" />
+    <Compile Include="ChessModels\Queen.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

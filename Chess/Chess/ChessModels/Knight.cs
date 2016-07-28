@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Chess.ChessModels
 {
-    public class King : IChessPiece
+    class Knight : IChessPiece
     {
         #region variables
         private char _piece;
@@ -24,7 +24,7 @@ namespace Chess.ChessModels
             }
             set
             {
-                if(value == 'K')
+                if (value == 'N')
                 {
                     _piece = value;
                 }
