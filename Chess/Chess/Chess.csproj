@@ -43,23 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChessModels\Bishop.cs" />
-    <Compile Include="ChessModels\IChessPiece.cs" />
-    <Compile Include="ChessModels\King.cs" />
-    <Compile Include="ChessModels\Knight.cs" />
-    <Compile Include="ChessModels\Pawn.cs" />
-    <Compile Include="ChessModels\Queen.cs" />
-    <Compile Include="ChessModels\Rook.cs" />
+    <Compile Include="ChessControl\ReadCommands.cs" />
     <Compile Include="ChessModels\Utility.cs" />
+    <Compile Include="ChessView\Print.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ChessControl\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

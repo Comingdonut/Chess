@@ -8,6 +8,11 @@ namespace Chess.ChessModels
 {
     public class Utility
     {
+        #region Variables
+        private string _piece;
+        private string _color;
+        private string _square;
+        #endregion
         /// <summary>
         /// Checks character parameter if it represents a board piece.
         /// </summary>
@@ -73,7 +78,7 @@ namespace Chess.ChessModels
             return "";
         }
         /// <summary>
-        /// Places square in a have finished sentence.
+        /// Places square in an incomplete sentence.
         /// </summary>
         /// <param name="square">Represents a square</param>
         /// <returns>returns a sentence regarding where the piece has been placed.</returns>
@@ -81,11 +86,21 @@ namespace Chess.ChessModels
         {
             return ("has been moved to " + square + ".");
         }
-
-        public void PrintCommand(string first, string second, string third)
+        /// <summary>
+        /// Sets the variables to the values passed in the parameters.
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name="color"></param>
+        /// <param name="square"></param>
+        public void StorePiece(char piece, char color, string square)
         {
-            Console.WriteLine(first + " " + second + " " + third);
+            Piece = CheckPiece(piece);
+            Color = CheckColor(color);
+            Square = PlacePiece(square);
         }
+        public string Piece { get {return _piece; } set {_piece = value; } }
+        public string Color { get { return _color; } set { _color = value; } }
+        public string Square { get { return _square; } set { _square = value; } }
         //-----------------------------------------------------------------------------------
     }
 }
