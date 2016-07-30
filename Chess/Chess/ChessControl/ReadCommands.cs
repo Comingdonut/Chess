@@ -1,10 +1,8 @@
 ﻿using Chess.ChessModels;
 using Chess.ChessView;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Chess.ChessControl
 {
@@ -12,50 +10,75 @@ namespace Chess.ChessControl
     {
         #region Variables
         private Utility util;
+        private Print print;
+        private const int PLACE_PIECE = 4;
+        private const int MOVE_PIECE = 5;
+        private const int CAPTURE_PIECE = 6;
+        private const int KING_SIDE_PIECE = 11;
+        public int PlacePiece{ get {return PLACE_PIECE; } set {; } }
+        public int MovePiece { get { return MOVE_PIECE; } set {; } }
+        public int CapturePiece { get { return CAPTURE_PIECE; } set {; } }
+        public int KingSide { get { return KING_SIDE_PIECE; } set {; } }
         #endregion
         /// <summary>
-        /// Constructor sets Utility to another utility.
+        /// 
         /// </summary>
-        /// <param name="util"></param>
-        public ReadCommands(Utility util)
+        /// <param name="line"></param>
+        public void ReadLine(string line)
         {
-            this.util = util;
+            util = new Utility();
+            print = new Print();
+            if (line.Length == PlacePiece)
+            {
+                ProcessFile(line, @"([KQBNRP])([ld])([a-h])([1-8])", print);
+            }
+            else if (line.Length == MovePiece)
+            {
+                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])", print);
+            }
+            else if (line.Length == CapturePiece)
+            {
+                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])", print);
+            }
+            else if (line.Length == KingSide)
+            {
+                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])", print);
+            }
         }
         /// <summary>
         /// Reads a text file line by line that contains commands for chess.
         /// Writes out the commands in readable english.
         /// </summary>
         /// <param name="print"></param>
-        public void ReadFile(Print print)
+        public void ProcessFile(string input, string pattern, Print print)
         {
-            // Read each line of the file into a string array. Each element
-            // of the array is one line of the file.
-            string[] lines = System.IO.File.ReadAllLines("C:/text.txt");
-            // Get the file's content by using a foreach loop.
-            foreach (string line in lines)
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success)
             {
-                //Creates and char array that has a length of the current line in the file.
-                char[] commands = new char[line.Length];
-                //Loops through the current line, setting each character to an index of commands
-                for (int j = 0; j < line.Length; j++)
+                for (int k = 1; k < match.Groups.Count; ++k)
                 {
-                    commands[j] = line.ElementAt(j);
+                    string line = match.Groups[k].Value;
                 }
-                //Continous if char[] meets required size, otherwise it skips current line.
-                if (commands.Length >= 4)
+                if(match.Length == PLACE_PIECE)
                 {
-                    //Checks if current line Places a pience on a square
-                    if (commands[0] <= 90 && commands[0] >= 65)
-                    {
-                        util.StorePiece(commands[0], commands[1], (commands[2] + "" + commands[3]), "");
-                        print.PrintPlaceCommand(util.Color, util.Piece, util.Square1);
-                    }
-                    //Checks to see if it moves a piece on a square to another square.
-                    else if (commands[0] <= 122 && commands[0] >= 97)
-                    {
-                        util.StorePiece(' ', ' ', (commands[0] + "" + commands[1]), (commands[3] + "" + commands[4]));
-                        print.PrintMoveCommand(util.Square2);
-                    }
+                    util.StorePiece(match.Groups[1].Value, match.Groups[2].Value, (match.Groups[3].Value + "" + match.Groups[4].Value), "");
+                    print.PrintPlaceCommand(util.Color, util.Piece, util.Square1);
+                }
+                else if (match.Length == MOVE_PIECE)
+                {
+                    util.StorePiece("", "", (match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                    print.PrintCommand(util.Square2);
+                }
+                else if (match.Length == CAPTURE_PIECE)
+                {
+                    util.StorePiece("", "", (match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                    print.PrintCommand(util.Square3);
+                }
+                else if(match.Length == KING_SIDE_PIECE)
+                {
+                    util.StoreKingSideCastle((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value), (match.Groups[7].Value + "" + match.Groups[8].Value), (match.Groups[10].Value + "" + match.Groups[11].Value));
+                    print.PrintCommand(util.Square4);
                 }
             }
         }

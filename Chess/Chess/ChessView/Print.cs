@@ -9,7 +9,7 @@ namespace Chess.ChessView
     public class Print
     {
         /// <summary>
-        /// Prints out th parameters as a single string in order.
+        /// Prints out the parameters as a single string in order.
         /// </summary>
         /// <param name="first">First string.</param>
         /// <param name="second">Second string.</param>
@@ -22,7 +22,7 @@ namespace Chess.ChessView
         /// Prints the parameter out to the console.
         /// </summary>
         /// <param name="first">Where the piece at a specific location has moved to.</param>
-        public void PrintMoveCommand(string first)
+        public void PrintCommand(string first)
         {
             Console.WriteLine(first);
         }

@@ -1,27 +1,27 @@
 ﻿using Chess.ChessControl;
 using Chess.ChessModels;
 using Chess.ChessView;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Chess
 {
     class Program
     {
         #region Variables
-        private Utility util;
         private ReadCommands read;
-        private Print print;
         #endregion
+        /// <summary>
+        /// Reads all lines from the file.
+        /// </summary>
         public void Run()
         {
-            util = new Utility();
-            read = new ReadCommands(util);
-            print = new Print();
-            read.ReadFile(print);
+            read = new ReadCommands();
+            string[] lines = System.IO.File.ReadAllLines(@"ChessCommands.txt");
+            
+            foreach (string line in lines)
+            {
+                read.ReadLine(line);
+            }
         }
         static void Main(string[] args)
         {
