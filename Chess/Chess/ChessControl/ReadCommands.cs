@@ -28,6 +28,7 @@ namespace Chess.ChessControl
         {
             util = new Utility();
             print = new Print();
+            print.PrintBoard(util.Board);
             if (line.Length == PlacePiece)
             {
                 ProcessFile(line, @"([KQBNRP])([ld])([a-h])([1-8])", print);
@@ -56,10 +57,10 @@ namespace Chess.ChessControl
 
             if (match.Success)
             {
-                for (int k = 1; k < match.Groups.Count; ++k)
-                {
-                    string line = match.Groups[k].Value;
-                }
+                //for (int k = 1; k < match.Groups.Count; ++k)
+                //{
+                //    string line = match.Groups[k].Value;
+                //}
                 if(match.Length == PLACE_PIECE)
                 {
                     util.StorePiece(match.Groups[1].Value, match.Groups[2].Value, (match.Groups[3].Value + "" + match.Groups[4].Value), "");

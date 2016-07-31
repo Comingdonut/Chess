@@ -12,8 +12,16 @@ namespace Chess.ChessModels
         private string _piece;
         private string _color;
         private string[] _square;
+        private string[,] _boardSquares;
+        private string[][] _columns;
         #endregion
-
+        public Utility()
+        {
+            _square = new string[4];
+            _boardSquares = new string[8,24];
+            _columns = new string[][] { new string[8], new string[8], new string[8], new string[8], new string[8], new string[8], new string[8], new string[8] };
+            SetBoard();
+        }
         /// <summary>
         /// Checks character parameter if it represents a board piece.
         /// </summary>
@@ -110,12 +118,12 @@ namespace Chess.ChessModels
         /// <summary>
         /// Sets the variables to the values passed in the parameters.
         /// </summary>
-        /// <param name="piece"></param>
-        /// <param name="color"></param>
-        /// <param name="square"></param>
+        /// <param name="piece">A piece abbreviation.</param>
+        /// <param name="color">Color of the piece.</param>
+        /// <param name="square1">Stores a piece's location.</param>
+        /// <param name="square2">Stores a piece's next location.</param>
         public void StorePiece(string piece, string color, string square1, string square2)
         {
-            _square = new string[4];
             if (piece != "")
             {
                 Piece = CheckPiece(piece);
@@ -126,7 +134,7 @@ namespace Chess.ChessModels
             Square3 = CapturePiece(square1, square2);
         }
         /// <summary>
-        /// 
+        /// Sets the variables to the values passed in the parameters.
         /// </summary>
         /// <param name="square1"></param>
         /// <param name="square2"></param>
@@ -134,8 +142,74 @@ namespace Chess.ChessModels
         /// <param name="square4"></param>
         public void StoreKingSideCastle(string square1, string square2, string square3, string square4)
         {
-            _square = new string[4];
             Square4 = KingSideCastle(square1, square2, square3, square4);
+        }
+        /// <summary>
+        /// Sets board squares and pieces to there rightful place.
+        /// </summary>
+        public void SetBoard()
+        {
+            //Creates squares
+            for (int x = 0; x < 8; ++x)
+            {
+                Board[x, 0] = "[";
+                Board[x, 2] = "]";
+                Board[x, 3] = "[";
+                Board[x, 5] = "]";
+                Board[x, 6] = "[";
+                Board[x, 8] = "]";
+                Board[x, 9] = "[";
+                Board[x, 11] = "]";
+                Board[x, 12] = "[";
+                Board[x, 14] = "]";
+                Board[x, 15] = "[";
+                Board[x, 17] = "]";
+                Board[x, 18] = "[";
+                Board[x, 20] = "]";
+                Board[x, 21] = "[";
+                Board[x, 23] = "]";
+            }
+            //Sets Black & White Pieces
+            Board[0, 13] = "K";//Kings
+            Board[7, 13] = "k";//Kings
+            Board[0, 10] = "Q";//Queens
+            Board[7, 10] = "q";//Queens
+            for (int x = 7; x < 24; x+=9)
+            {
+                Board[0, x] = "B";//Black Bishops
+                Board[7, x] = "b";//White Bishops
+            }
+            for (int x = 4; x < 21; x+=15)
+            {
+                Board[0, x] = "N";//Black Knight
+                Board[7, x] = "n";//White Knight
+            }
+            for (int x = 1; x < 23; x+=21)
+            {
+                Board[0, x] = "R";//Black Rooks
+                Board[7, x] = "r";//White Rooks
+            }
+            for (int x = 1; x < 24; x+=3)
+            {
+                Board[1, x] = "P";//Black Pawns
+                Board[6, x] = "p";//White Pawns
+            }
+            //Empty squares
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 24; y++)
+                {
+                    if (Board[x, y] == null)
+                    {
+                        Board[x, y] = "-";
+                    }
+                }
+            }
+        }
+
+        public void MovePiece(char startColumn, char startRow, char finalColumn, char finalRow)
+        {
+            
         }
         #region Properties
         public string Piece { get {return _piece; } set {_piece = value; } }
@@ -144,6 +218,7 @@ namespace Chess.ChessModels
         public string Square2 { get { return _square[1]; } set { _square[1] = value; } }
         public string Square3 { get { return _square[2]; } set { _square[2] = value; } }
         public string Square4 { get { return _square[3]; } set { _square[3] = value; } }
+        public string[,] Board { get {return _boardSquares; } set {_boardSquares= value; } }
         #endregion
         //-----------------------------------------------------------------------------------
     }
