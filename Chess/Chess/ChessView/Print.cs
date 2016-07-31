@@ -9,27 +9,17 @@ namespace Chess.ChessView
     public class Print
     {
         /// <summary>
-        /// Prints out the parameters as a single string in order.
-        /// </summary>
-        /// <param name="first">First string.</param>
-        /// <param name="second">Second string.</param>
-        /// <param name="third">Third string.</param>
-        public void PrintPlaceCommand(string first, string second, string third)
-        {
-            Console.WriteLine(first + " " + second + " " + third);
-        }
-        /// <summary>
         /// Prints the parameter out to the console.
         /// </summary>
-        /// <param name="first">Where the piece at a specific location has moved to.</param>
-        public void PrintCommand(string first)
+        /// <param name="command">Where the piece at a specific location has moved to.</param>
+        public void PrintCommand(string command)
         {
-            Console.WriteLine(first);
+            Console.WriteLine(command);
         }
         /// <summary>
-        /// Prints out 24 array values before moving on to the next set of 24
+        /// Prints out 24 array values before moving on to the next set of 24 values.
         /// </summary>
-        /// <param name="boardSqaures">Represents a board. Required size for the array is 194</param>
+        /// <param name="boardSqaures">Represents a board. Required size for the 2-D array is 8 rows and 24 columns.</param>
         public void PrintBoard(string[,] boardSqaures)
         {
 

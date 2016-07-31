@@ -10,12 +10,15 @@ namespace Chess
         #region Variables
         private ReadCommands read;
         #endregion
+        public Program()
+        {
+            read = new ReadCommands();
+        }
         /// <summary>
-        /// Reads all lines from the file.
+        /// Reads all lines from a file.
         /// </summary>
         public void Run()
         {
-            read = new ReadCommands();
             string[] lines = System.IO.File.ReadAllLines(@"ChessCommands.txt");
             
             foreach (string line in lines)

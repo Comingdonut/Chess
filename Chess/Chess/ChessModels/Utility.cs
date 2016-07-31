@@ -13,13 +13,15 @@ namespace Chess.ChessModels
         private string _color;
         private string[] _square;
         private string[,] _boardSquares;
-        private string[][] _columns;
+        private int[] startMove;
+        private int[] endMove;
         #endregion
         public Utility()
         {
             _square = new string[4];
             _boardSquares = new string[8,24];
-            _columns = new string[][] { new string[8], new string[8], new string[8], new string[8], new string[8], new string[8], new string[8], new string[8] };
+            startMove = new int[2];
+            endMove = new int[2];
             SetBoard();
         }
         /// <summary>
@@ -75,71 +77,105 @@ namespace Chess.ChessModels
             }
         }
         /// <summary>
-        /// Places square in an incomplete sentence.
+        /// Places a piece on the board.
         /// </summary>
-        /// <param name="square">Represents a square</param>
+        /// <param name="square">Represents a square.</param>
         /// <returns>returns a sentence regarding where the piece has been placed.</returns>
         public string PlacePiece(string square1)
         {
-            return ("has been placed at " + square1 + ".");
+            startMove = GrabPiece(square1[0], square1[1]);
+            if (Color[0] == 'B')
+            {
+                Board[startMove[0], startMove[1]] = Piece[0].ToString();
+            }
+            else
+            {
+                Board[startMove[0], startMove[1]] = Piece[0].ToString().ToLower();
+            }
+            return (Color + " " + Piece + " has been placed at " + square1 + ".");
         }
         /// <summary>
-        /// Describes the movment of a piece.
+        /// Moves a piece on the board.
         /// </summary>
         /// <param name="square1">Where the piece initially is.</param>
         /// <param name="square2">Where the piece will be.</param>
-        /// <returns>Returns a sentence about where a piece has been and where it went.</returns>
+        /// <returns>Returns the command in plain english.</returns>
         public string MovePiece(string square1, string square2)
         {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = "-";
             return ("The piece at " + square1 + " moved to " + square2 + ".");
         }
         /// <summary>
-        /// Describes the movment/capture of a piece.
+        /// Moves a piece on a board to capture an enemy piece already there.
         /// </summary>
-        /// <param name="square1"></param>
-        /// <param name="square2"></param>
-        /// <returns>Returns a sentence about where a piece has been, where it went/captured.</returns>
+        /// <param name="square1">Square where the piece use to be.</param>
+        /// <param name="square2">Square where the piece will be.</param>
+        /// <returns>Returns the command in plain english.</returns>
         public string CapturePiece(string square1, string square2)
         {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = "-";
             return ("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
         }
         /// <summary>
+        /// Moves a King left/right 2 squares, while moving a Rook to the right/left of the King.
         /// Describes the actions of king-side-castle.
         /// </summary>
         /// <param name="square1">Square where the king use to be.</param>
         /// <param name="square2">Square where the king will be.</param>
         /// <param name="square3">Square where the rook initially is.</param>
         /// <param name="square4">Square where the rook will be.</param>
-        /// <returns></returns>
+        /// <returns>Returns the command in plain english.</returns>
         public string KingSideCastle(string square1, string square2, string square3, string square4)
         {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = "-";
+            startMove = GrabPiece(square3[0], square3[1]);
+            endMove = GrabPiece(square4[0], square4[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = "-";
             return "King has moved from " + square1 + " to " + square2 + ", rook moved from " + square3 + " to " + square4 + ".";
         }
         /// <summary>
         /// Sets the variables to the values passed in the parameters.
         /// </summary>
-        /// <param name="piece">A piece abbreviation.</param>
-        /// <param name="color">Color of the piece.</param>
         /// <param name="square1">Stores a piece's location.</param>
         /// <param name="square2">Stores a piece's next location.</param>
-        public void StorePiece(string piece, string color, string square1, string square2)
+        /// <param name="isCapturing">
+        /// True if moving a piece will capture an enemy piece.
+        /// False if moving a piece will not capture a piece.
+        /// </param>
+        public void StorePiece(string square1, string square2, bool isCapturing)
         {
-            if (piece != "")
-            {
-                Piece = CheckPiece(piece);
-                Color = CheckColor(color);
+            if (square1[0] <= 90 && square1[0] >= 65) {
+                Square1 = PlacePiece(square1);
             }
-            Square1 = PlacePiece(square1);
-            Square2 = MovePiece(square1, square2);
-            Square3 = CapturePiece(square1, square2);
+            else
+            {
+                if (isCapturing == false)
+                {
+                    Square2 = MovePiece(square1, square2);
+                }
+                else
+                {
+                    Square3 = CapturePiece(square1, square2);
+                }
+            }
         }
         /// <summary>
         /// Sets the variables to the values passed in the parameters.
         /// </summary>
-        /// <param name="square1"></param>
-        /// <param name="square2"></param>
-        /// <param name="square3"></param>
-        /// <param name="square4"></param>
+        /// <param name="square1">Square where the king use to be.</param>
+        /// <param name="square2">Square where the king will be.</param>
+        /// <param name="square3">Square where the rook initially is.</param>
+        /// <param name="square4">Square where the rook will be.</param>
         public void StoreKingSideCastle(string square1, string square2, string square3, string square4)
         {
             Square4 = KingSideCastle(square1, square2, square3, square4);
@@ -206,10 +242,76 @@ namespace Chess.ChessModels
                 }
             }
         }
-
-        public void MovePiece(char startColumn, char startRow, char finalColumn, char finalRow)
+        /// <summary>
+        /// Reads in a column letter and row number to store it in an Array.
+        /// </summary>
+        /// <param name="column">Column letter from a chess board.</param>
+        /// <param name="row">Row number from a chess board.</param>
+        /// <returns>Returns an array with the column and row paremeters passed.</returns>
+        public int[] GrabPiece(char column, char row)
         {
-            
+            int x = 0;//rows
+            int y = 0;//columns
+            switch (row)
+            {
+                case '8':
+                    x = 0;
+                    break;
+                case '7':
+                    x = 1;
+                    break;
+                case '6':
+                    x = 2;
+                    break;
+                case '5':
+                    x = 3;
+                    break;
+                case '4':
+                    x = 4;
+                    break;
+                case '3':
+                    x = 5;
+                    break;
+                case '2':
+                    x = 6;
+                    break;
+                case '1':
+                    x = 7;
+                    break;
+                default:
+                    break;
+            }
+            switch (column)
+            {
+                case 'a':
+                    y = 1;
+                    break;
+                case 'b':
+                    y = 4;
+                    break;
+                case 'c':
+                    y = 7;
+                    break;
+                case 'd':
+                    y = 10;
+                    break;
+                case 'e':
+                    y = 13;
+                    break;
+                case 'f':
+                    y = 16;
+                    break;
+                case 'g':
+                    y = 19;
+                    break;
+                case 'h':
+                    y = 22;
+                    break;
+                default:
+                    break;
+            }
+            int[] rowColumns = new int[] { x, y };
+            return rowColumns;
         }
         #region Properties
         public string Piece { get {return _piece; } set {_piece = value; } }

@@ -20,60 +20,64 @@ namespace Chess.ChessControl
         public int CapturePiece { get { return CAPTURE_PIECE; } set {; } }
         public int KingSide { get { return KING_SIDE_PIECE; } set {; } }
         #endregion
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="line"></param>
-        public void ReadLine(string line)
+        public ReadCommands()
         {
             util = new Utility();
             print = new Print();
+        }
+        /// <summary>
+        /// Reads in lines from a file and checks for commands.
+        /// </summary>
+        /// <param name="line">A line from a file.</param>
+        public void ReadLine(string line)
+        {
             print.PrintBoard(util.Board);
             if (line.Length == PlacePiece)
             {
-                ProcessFile(line, @"([KQBNRP])([ld])([a-h])([1-8])", print);
+                ProcessLine(line, @"([KQBNRP])([ld])([a-h])([1-8])");
             }
             else if (line.Length == MovePiece)
             {
-                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])", print);
+                ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])");
             }
             else if (line.Length == CapturePiece)
             {
-                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])", print);
+                ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])");
             }
             else if (line.Length == KingSide)
             {
-                ProcessFile(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])", print);
+                ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])");
             }
+            print.PrintBoard(util.Board);
+            Console.WriteLine("<--------------------------------------------------->");
         }
         /// <summary>
-        /// Reads a text file line by line that contains commands for chess.
-        /// Writes out the commands in readable english.
+        /// Reads a line that contains commands for chess and
+        /// writes out the commands in readable english.
         /// </summary>
-        /// <param name="print"></param>
-        public void ProcessFile(string input, string pattern, Print print)
+        /// <param name="input">A line from a file.</param>
+        /// <param name="pattern">A pattern to interpret the line.</param>
+        public void ProcessLine(string input, string pattern)
         {
             Match match = Regex.Match(input, pattern);
 
             if (match.Success)
             {
-                //for (int k = 1; k < match.Groups.Count; ++k)
-                //{
-                //    string line = match.Groups[k].Value;
-                //}
                 if(match.Length == PLACE_PIECE)
                 {
-                    util.StorePiece(match.Groups[1].Value, match.Groups[2].Value, (match.Groups[3].Value + "" + match.Groups[4].Value), "");
-                    print.PrintPlaceCommand(util.Color, util.Piece, util.Square1);
+                    util.Piece = util.CheckPiece(match.Groups[1].Value);//Type of piece is being set.
+                    util.Color = util.CheckColor(match.Groups[2].Value);//Color is being set.
+                    util.StorePiece((match.Groups[3].Value + "" + match.Groups[4].Value), "", false);
+                    print.PrintCommand(util.Square1);
                 }
                 else if (match.Length == MOVE_PIECE)
                 {
-                    util.StorePiece("", "", (match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                    util.StorePiece((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value), false);
                     print.PrintCommand(util.Square2);
                 }
                 else if (match.Length == CAPTURE_PIECE)
                 {
-                    util.StorePiece("", "", (match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                    util.StorePiece((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value), true);
                     print.PrintCommand(util.Square3);
                 }
                 else if(match.Length == KING_SIDE_PIECE)
