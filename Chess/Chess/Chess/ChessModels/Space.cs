@@ -15,7 +15,7 @@
             Symbol = ' ';
         }
         public void CheckMovement() { }
-        public void CheckSquare() { }
+        public void CheckSquare(ChessPiece square) { }
         public void MovePiece() { }
     }
 }

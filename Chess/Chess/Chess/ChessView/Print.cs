@@ -6,14 +6,6 @@ namespace Chess.ChessView
     public class Print
     {
         /// <summary>
-        /// Prints the parameter out to the console.
-        /// </summary>
-        /// <param name="command">Where the piece at a specific location has moved to.</param>
-        public void PrintCommand(string command)
-        {
-            Console.WriteLine(command);
-        }
-        /// <summary>
         /// Prints out 24 array values before moving on to the next set of 24 values.
         /// </summary>
         /// <param name="boardSqaures">Represents a board. Required size for the 2-D array is 8 rows and 24 columns.</param>

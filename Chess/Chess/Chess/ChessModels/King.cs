@@ -17,16 +17,15 @@ namespace Chess.ChessModels
         }
         public void CheckMovement()
         {
-            throw new NotImplementedException();
+            
         }
-        public void CheckSquare()
+        public void CheckSquare(ChessPiece square)
         {
-            throw new NotImplementedException();
+            
         }
-
         public void MovePiece()
         {
-            throw new NotImplementedException();
+            
         }
 
     }
