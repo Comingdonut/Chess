@@ -1,18 +1,15 @@
 ﻿using Chess.ChessControl;
-using Chess.ChessModels;
-using Chess.ChessView;
-using System.IO;
 
 namespace Chess
 {
     class Program
     {
         #region Variables
-        private ReadCommands read;
+        private Commands read;
         #endregion
         public Program()
         {
-            read = new ReadCommands();
+            read = new Commands();
         }
         /// <summary>
         /// Reads all lines from a file.

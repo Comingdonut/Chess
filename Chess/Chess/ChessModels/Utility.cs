@@ -1,31 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Chess.ChessModels
 {
     public class Utility
     {
         #region Variables
+        private const int PLACE_PIECE = 4;
+        private const int MOVE_PIECE = 5;
+        private const int CAPTURE_PIECE = 6;
+        private const int KING_SIDE_PIECE = 11;
         private string _piece;
         private string _color;
-        private string[] _square;
-        private string[,] _boardSquares;
+        private ChessPiece[,] _boardSquares;
+        private ChessPiece _pieceHolder;
         private int[] startMove;
         private int[] endMove;
         #endregion
         public Utility()
         {
-            _square = new string[4];
-            _boardSquares = new string[8,24];
+            _boardSquares = new ChessPiece[8,8];
             startMove = new int[2];
             endMove = new int[2];
             SetBoard();
         }
+        #region Check Piece/Color
         /// <summary>
-        /// Checks character parameter if it represents a board piece.
+        /// Checks the parameter if it represents a board piece.
+        /// If it does, then it sets _pieceHolder to a the board piece.
         /// </summary>
         /// <param name="piece">
         /// K = King
@@ -38,210 +40,69 @@ namespace Chess.ChessModels
         /// <returns>Returns the name of a board piece</returns>
         public string CheckPiece(string piece)
         {
+            string name;
             switch (piece)
             {
                 case "K":
-                    return "King";
+                    _pieceHolder = new King(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 case "Q":
-                    return "Queen";
+                    _pieceHolder = new Queen(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 case "B":
-                    return "Bishop";
+                    _pieceHolder = new Bishop(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 case "N":
-                    return "Knight";
+                    _pieceHolder = new Knight(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 case "R":
-                    return "Rook";
+                    _pieceHolder = new Rook(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 case "P":
-                    return "Pawn";
+                    _pieceHolder = new Pawn(' ');
+                    name = _pieceHolder.Piece;
+                    break;
                 default:
-                    throw new Exception("Invalid character piece...");
+                    Console.Error.WriteLine("Invalid Piece");
+                    name = null;
+                    break;
             }
+            return name;
         }
         /// <summary>
-        /// Checks character parameter if represents a color.
+        /// Checks the parameter if represents a color.
+        /// If it does, then it sets _placeHolder's color to to the paremeter.
         /// </summary>
         /// <param name="color">
         /// l = "Light"
         /// d = "Dark"
         /// </param>
-        /// <returns>Returns dark or light</returns>
+        /// <returns>Returns dark or light depending on the paremeter.</returns>
         public string CheckColor(string color)
         {
+            string brush;
             switch (color)
             {
                 case "l":
-                    return "White";
+                    brush = "Light";
+                    break;
                 case "d":
-                    return "Black";
+                    brush = "Dark";
+                    break;
                 default:
                 throw new Exception("Invalid color character...");
             }
+            _pieceHolder.Color = color[0];
+            return brush;
         }
-        /// <summary>
-        /// Places a piece on the board.
-        /// </summary>
-        /// <param name="square">Represents a square.</param>
-        /// <returns>returns a sentence regarding where the piece has been placed.</returns>
-        public string PlacePiece(string square1)
-        {
-            startMove = GrabPiece(square1[0], square1[1]);
-            if (Color[0] == 'B')
-            {
-                Board[startMove[0], startMove[1]] = Piece[0].ToString();
-            }
-            else
-            {
-                Board[startMove[0], startMove[1]] = Piece[0].ToString().ToLower();
-            }
-            return (Color + " " + Piece + " has been placed at " + square1 + ".");
-        }
-        /// <summary>
-        /// Moves a piece on the board.
-        /// </summary>
-        /// <param name="square1">Where the piece initially is.</param>
-        /// <param name="square2">Where the piece will be.</param>
-        /// <returns>Returns the command in plain english.</returns>
-        public string MovePiece(string square1, string square2)
-        {
-            startMove = GrabPiece(square1[0], square1[1]);
-            endMove = GrabPiece(square2[0], square2[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = "-";
-            return ("The piece at " + square1 + " moved to " + square2 + ".");
-        }
-        /// <summary>
-        /// Moves a piece on a board to capture an enemy piece already there.
-        /// </summary>
-        /// <param name="square1">Square where the piece use to be.</param>
-        /// <param name="square2">Square where the piece will be.</param>
-        /// <returns>Returns the command in plain english.</returns>
-        public string CapturePiece(string square1, string square2)
-        {
-            startMove = GrabPiece(square1[0], square1[1]);
-            endMove = GrabPiece(square2[0], square2[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = "-";
-            return ("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
-        }
-        /// <summary>
-        /// Moves a King left/right 2 squares, while moving a Rook to the right/left of the King.
-        /// Describes the actions of king-side-castle.
-        /// </summary>
-        /// <param name="square1">Square where the king use to be.</param>
-        /// <param name="square2">Square where the king will be.</param>
-        /// <param name="square3">Square where the rook initially is.</param>
-        /// <param name="square4">Square where the rook will be.</param>
-        /// <returns>Returns the command in plain english.</returns>
-        public string KingSideCastle(string square1, string square2, string square3, string square4)
-        {
-            startMove = GrabPiece(square1[0], square1[1]);
-            endMove = GrabPiece(square2[0], square2[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = "-";
-            startMove = GrabPiece(square3[0], square3[1]);
-            endMove = GrabPiece(square4[0], square4[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = "-";
-            return "King has moved from " + square1 + " to " + square2 + ", rook moved from " + square3 + " to " + square4 + ".";
-        }
-        /// <summary>
-        /// Sets the variables to the values passed in the parameters.
-        /// </summary>
-        /// <param name="square1">Stores a piece's location.</param>
-        /// <param name="square2">Stores a piece's next location.</param>
-        /// <param name="isCapturing">
-        /// True if moving a piece will capture an enemy piece.
-        /// False if moving a piece will not capture a piece.
-        /// </param>
-        public void StorePiece(string square1, string square2, bool isCapturing)
-        {
-            if (square1[0] <= 90 && square1[0] >= 65) {
-                Square1 = PlacePiece(square1);
-            }
-            else
-            {
-                if (isCapturing == false)
-                {
-                    Square2 = MovePiece(square1, square2);
-                }
-                else
-                {
-                    Square3 = CapturePiece(square1, square2);
-                }
-            }
-        }
-        /// <summary>
-        /// Sets the variables to the values passed in the parameters.
-        /// </summary>
-        /// <param name="square1">Square where the king use to be.</param>
-        /// <param name="square2">Square where the king will be.</param>
-        /// <param name="square3">Square where the rook initially is.</param>
-        /// <param name="square4">Square where the rook will be.</param>
-        public void StoreKingSideCastle(string square1, string square2, string square3, string square4)
-        {
-            Square4 = KingSideCastle(square1, square2, square3, square4);
-        }
-        /// <summary>
-        /// Sets board squares and pieces to there rightful place.
-        /// </summary>
-        public void SetBoard()
-        {
-            //Creates squares
-            for (int x = 0; x < 8; ++x)
-            {
-                Board[x, 0] = "[";
-                Board[x, 2] = "]";
-                Board[x, 3] = "[";
-                Board[x, 5] = "]";
-                Board[x, 6] = "[";
-                Board[x, 8] = "]";
-                Board[x, 9] = "[";
-                Board[x, 11] = "]";
-                Board[x, 12] = "[";
-                Board[x, 14] = "]";
-                Board[x, 15] = "[";
-                Board[x, 17] = "]";
-                Board[x, 18] = "[";
-                Board[x, 20] = "]";
-                Board[x, 21] = "[";
-                Board[x, 23] = "]";
-            }
-            //Sets Black & White Pieces
-            Board[0, 13] = "K";//Kings
-            Board[7, 13] = "k";//Kings
-            Board[0, 10] = "Q";//Queens
-            Board[7, 10] = "q";//Queens
-            for (int x = 7; x < 24; x+=9)
-            {
-                Board[0, x] = "B";//Black Bishops
-                Board[7, x] = "b";//White Bishops
-            }
-            for (int x = 4; x < 21; x+=15)
-            {
-                Board[0, x] = "N";//Black Knight
-                Board[7, x] = "n";//White Knight
-            }
-            for (int x = 1; x < 23; x+=21)
-            {
-                Board[0, x] = "R";//Black Rooks
-                Board[7, x] = "r";//White Rooks
-            }
-            for (int x = 1; x < 24; x+=3)
-            {
-                Board[1, x] = "P";//Black Pawns
-                Board[6, x] = "p";//White Pawns
-            }
-            //Empty squares
-            for (int x = 0; x < 8; ++x)
-            {
-                for (int y = 0; y < 24; y++)
-                {
-                    if (Board[x, y] == null)
-                    {
-                        Board[x, y] = "-";
-                    }
-                }
-            }
-        }
+        #endregion
+
+        #region Grab/Place/Move/Capture Piece
         /// <summary>
         /// Reads in a column letter and row number to store it in an Array.
         /// </summary>
@@ -284,28 +145,28 @@ namespace Chess.ChessModels
             switch (column)
             {
                 case 'a':
-                    y = 1;
+                    y = 0;
                     break;
                 case 'b':
-                    y = 4;
+                    y = 1;
                     break;
                 case 'c':
-                    y = 7;
+                    y = 2;
                     break;
                 case 'd':
-                    y = 10;
+                    y = 3;
                     break;
                 case 'e':
-                    y = 13;
+                    y = 4;
                     break;
                 case 'f':
-                    y = 16;
+                    y = 5;
                     break;
                 case 'g':
-                    y = 19;
+                    y = 6;
                     break;
                 case 'h':
-                    y = 22;
+                    y = 7;
                     break;
                 default:
                     break;
@@ -313,14 +174,170 @@ namespace Chess.ChessModels
             int[] rowColumns = new int[] { x, y };
             return rowColumns;
         }
+        /// <summary>
+        /// Places the desired colored piece to the desired space on the board.
+        /// Prints out a sentence regarding where the piece has been placed.
+        /// </summary>
+        /// <param name="square">Represents a square that will be holding the new piece.</param>
+        /// <returns></returns>
+        public void PlacePiece(string square1)
+        {
+            startMove = GrabPiece(square1[0], square1[1]);
+            Board[startMove[0], startMove[1]] = _pieceHolder;
+            Console.WriteLine(Color + " " + _pieceHolder.Piece + " has been placed at " + square1 + ".");
+        }
+        /// <summary>
+        /// Moves a piece from it's start location to the desired location.
+        /// Prints out where the piece moved too, in plain english.
+        /// </summary>
+        /// <param name="square1">The starting point of the piece.</param>
+        /// <param name="square2">The end point for the piece.</param>
+        public void MovePiece(string square1, string square2)
+        {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = new Space();
+            Console.WriteLine("The piece at " + square1 + " moved to " + square2 + ".");
+        }
+        /// <summary>
+        /// Moves a piece from it's start location to the desired location and captures
+        /// the piece.
+        /// Prints out where the piece moved too, in plain english.
+        /// </summary>
+        /// <param name="square1">The starting point of the piece.</param>
+        /// <param name="square2">The end point for the piece.</param>
+        public void CapturePiece(string square1, string square2)
+        {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = new Space();
+            Console.WriteLine("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
+        }
+        /// <summary>
+        /// Moves a King left/right 2 squares, while moving a Rook to the right/left of the King.
+        /// Describes the actions of king-side-castle.
+        /// Print out where the pieces moved too, in plain english.
+        /// </summary>
+        /// <param name="square1">The starting point of the king</param>
+        /// <param name="square2">The end point for the king.</param>
+        /// <param name="square3">The starting point of the Rook.</param>
+        /// <param name="square4">The end point for the Rook.</param>
+        public void KingSideCastle(string square1, string square2, string square3, string square4)
+        {
+            startMove = GrabPiece(square1[0], square1[1]);
+            endMove = GrabPiece(square2[0], square2[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = new Space();
+            startMove = GrabPiece(square3[0], square3[1]);
+            endMove = GrabPiece(square4[0], square4[1]);
+            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
+            Board[startMove[0], startMove[1]] = new Space();
+            Console.WriteLine("King has moved from " + square1 + " to " + square2 + ", rook moved from " + square3 + " to " + square4 + ".");
+        }
+        #endregion
+        
+        #region SetBoard
+        /// <summary>
+        /// Sets empty board squares and pieces to there rightful location and color.
+        /// </summary>
+        public void SetBoard()
+        {
+            //Creates squares
+            for (int x = 0; x < 8; ++x)
+            {
+                Board[x, 0] = new Space();
+                Board[x, 1] = new Space();
+                Board[x, 2] = new Space();
+                Board[x, 3] = new Space();
+                Board[x, 4] = new Space();
+                Board[x, 5] = new Space();
+                Board[x, 6] = new Space();
+                Board[x, 7] = new Space();
+            }
+            //Sets Black & White Pieces
+            Board[0, 4] = new King('d');//Kings
+            Board[7, 4] = new King('l');//Kings
+            Board[0, 3] = new Queen('d');//Queens
+            Board[7, 3] = new Queen('l');//Queens
+            for (int x = 2; x < 6; x+=3)
+            {
+                Board[0, x] = new Bishop('d');//Black Bishops
+                Board[7, x] = new Bishop('l');//White Bishops
+            }
+            for (int x = 1; x < 7; x+=5)
+            {
+                Board[0, x] = new Knight('d');//Black Knight
+                Board[7, x] = new Knight('l');//White Knight
+            }
+            for (int x = 0; x < 9; x+=7)
+            {
+                Board[0, x] = new Rook('d');//Black Rooks
+                Board[7, x] = new Rook('l');//White Rooks
+            }
+            for (int x = 0; x < 8; x++)
+            {
+                Board[1, x] = new Pawn('d');//Black Pawns
+                Board[6, x] = new Pawn('l');//White Pawns
+            }
+            //Empty squares
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    if (Board[x, y] == null)
+                    {
+                        Board[x, y] = new Space();
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region ProcessLine
+        /// <summary>
+        /// Reads a line that contains commands for chess and
+        /// writes out the commands in readable english.
+        /// </summary>
+        /// <param name="input">A line from a file.</param>
+        /// <param name="pattern">A pattern to interpret the line.</param>
+        public void ProcessLine(string input, string pattern)
+        {
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success)
+            {
+                if (match.Length == PLACE_PIECE)
+                {
+                    Piece = CheckPiece(match.Groups[1].Value);//Type of piece is being set.
+                    Color = CheckColor(match.Groups[2].Value);//Color is being set.
+                    PlacePiece(match.Groups[3].Value + "" + match.Groups[4].Value);
+                }
+                else if (match.Length == MOVE_PIECE)
+                {
+                    MovePiece((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                }
+                else if (match.Length == CAPTURE_PIECE)
+                {
+                    CapturePiece((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value));
+                }
+                else if (match.Length == KING_SIDE_PIECE)
+                {
+                    KingSideCastle((match.Groups[1].Value + "" + match.Groups[2].Value), (match.Groups[4].Value + "" + match.Groups[5].Value), (match.Groups[7].Value + "" + match.Groups[8].Value), (match.Groups[10].Value + "" + match.Groups[11].Value));
+                }
+            }
+        }
+        #endregion
+
         #region Properties
+        public int Place_Piece { get {return PLACE_PIECE; } }
+        public int Move_Piece { get { return MOVE_PIECE; } }
+        public int Capture_Piece { get { return CAPTURE_PIECE; } }
+        public int King_Side_Piece { get { return KING_SIDE_PIECE; } }
         public string Piece { get {return _piece; } set {_piece = value; } }
         public string Color { get { return _color; } set { _color = value; } }
-        public string Square1 { get { return _square[0]; } set { _square[0] = value; } }
-        public string Square2 { get { return _square[1]; } set { _square[1] = value; } }
-        public string Square3 { get { return _square[2]; } set { _square[2] = value; } }
-        public string Square4 { get { return _square[3]; } set { _square[3] = value; } }
-        public string[,] Board { get {return _boardSquares; } set {_boardSquares= value; } }
+        public ChessPiece[,] Board { get {return _boardSquares; } set {_boardSquares= value; } }
         #endregion
         //-----------------------------------------------------------------------------------
     }
