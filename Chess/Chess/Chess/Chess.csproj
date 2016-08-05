@@ -43,7 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChessControl\ReadCommands.cs" />
+    <Compile Include="ChessControl\Commands.cs" />
+    <Compile Include="ChessModels\Bishop.cs" />
+    <Compile Include="ChessModels\ChessPiece.cs" />
+    <Compile Include="ChessModels\King.cs" />
+    <Compile Include="ChessModels\Knight.cs" />
+    <Compile Include="ChessModels\Pawn.cs" />
+    <Compile Include="ChessModels\Queen.cs" />
+    <Compile Include="ChessModels\Rook.cs" />
+    <Compile Include="ChessModels\Space.cs" />
     <Compile Include="ChessModels\Utility.cs" />
     <Compile Include="ChessView\Print.cs" />
     <Compile Include="Program.cs" />
