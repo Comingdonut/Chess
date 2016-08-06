@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Chess.ChessModels
 {
@@ -16,17 +17,24 @@ namespace Chess.ChessModels
             Piece = "Pawn";
             Symbol = 'P';
         }
-        public void CheckMovement()
+        public bool CheckMovement(ChessPiece[,] board, int[] start, int[] end)
         {
-
+            return false;
         }
-        public void CheckSquare(ChessPiece square)
+        public bool CheckSquare(ChessPiece[,] board, int[] end)
         {
-
+            return false;
         }
-        public void MovePiece()
+        public void MovePiece(ChessPiece[,] board, int[] start, int[] end)
         {
+            board[end[0], end[1]] = board[start[0], start[1]];
+            board[start[0], start[1]] = new Space();
+        }
+        public List<int[]> IsAvailable(int[] start)
+        {
+            List<int[]> available = new List<int[]>();
 
+            return available;
         }
     }
 }

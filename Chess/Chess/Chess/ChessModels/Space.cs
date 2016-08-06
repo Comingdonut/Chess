@@ -1,4 +1,6 @@
-﻿namespace Chess.ChessModels
+﻿using System.Collections.Generic;
+
+namespace Chess.ChessModels
 {
     public class Space : ChessPiece
     {
@@ -14,8 +16,9 @@
             Piece = " ";
             Symbol = ' ';
         }
-        public void CheckMovement() { }
-        public void CheckSquare(ChessPiece square) { }
-        public void MovePiece() { }
+        public bool CheckMovement(ChessPiece[,] board, int[] start, int[] end) { return false; }
+        public bool CheckSquare(ChessPiece[,] square, int[] end) { return false; }
+        public void MovePiece(ChessPiece[,] board, int[] start, int[] end) { }
+        public List<int[]> IsAvailable(int[] start) { return new List<int[]>(); }
     }
 }

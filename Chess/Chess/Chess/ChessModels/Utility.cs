@@ -104,7 +104,7 @@ namespace Chess.ChessModels
 
         #region Grab/Place/Move/Capture Piece
         /// <summary>
-        /// Reads in a column letter and row number to store it in an Array.
+        /// Reads in a column letter and row number to convert and store it in an Array.
         /// </summary>
         /// <param name="column">Column letter from a chess board.</param>
         /// <param name="row">Row number from a chess board.</param>
@@ -196,8 +196,21 @@ namespace Chess.ChessModels
         {
             startMove = GrabPiece(square1[0], square1[1]);
             endMove = GrabPiece(square2[0], square2[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = new Space();
+            if(Board[startMove[0], startMove[1]].CheckMovement(Board, startMove, endMove) == true)
+            {
+                if (Board[startMove[0], startMove[1]].CheckSquare(Board, endMove))
+                {
+                    Board[startMove[0], startMove[1]].MovePiece(Board, startMove, endMove);
+                }
+                else
+                {
+                    Console.Error.WriteLine("You can not capture your own piece, please try again...");
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("Invalid piece movement, please try again...");
+            }
             Console.WriteLine("The piece at " + square1 + " moved to " + square2 + ".");
         }
         /// <summary>
@@ -211,8 +224,21 @@ namespace Chess.ChessModels
         {
             startMove = GrabPiece(square1[0], square1[1]);
             endMove = GrabPiece(square2[0], square2[1]);
-            Board[endMove[0], endMove[1]] = Board[startMove[0], startMove[1]];
-            Board[startMove[0], startMove[1]] = new Space();
+            if (Board[startMove[0], startMove[1]].CheckMovement(Board, startMove, endMove) == true)
+            {
+                if (Board[startMove[0], startMove[1]].CheckSquare(Board, endMove))
+                {
+                    Board[startMove[0], startMove[1]].MovePiece(Board, startMove, endMove);
+                }
+                else
+                {
+                    Console.Error.WriteLine("You can not capture your own piece, please try again...");
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("Invalid piece movement, please try again...");
+            }
             Console.WriteLine("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
         }
         /// <summary>
@@ -310,8 +336,8 @@ namespace Chess.ChessModels
             {
                 if (match.Length == PLACE_PIECE)
                 {
-                    Piece = CheckPiece(match.Groups[1].Value);//Type of piece is being set.
-                    Color = CheckColor(match.Groups[2].Value);//Color is being set.
+                    Piece = CheckPiece(match.Groups[1].Value);
+                    Color = CheckColor(match.Groups[2].Value);
                     PlacePiece(match.Groups[3].Value + "" + match.Groups[4].Value);
                 }
                 else if (match.Length == MOVE_PIECE)
