@@ -179,7 +179,6 @@ namespace Chess.ChessModels
         /// Prints out a sentence regarding where the piece has been placed.
         /// </summary>
         /// <param name="square">Represents a square that will be holding the new piece.</param>
-        /// <returns></returns>
         public void PlacePiece(string square1)
         {
             startMove = GrabPiece(square1[0], square1[1]);
@@ -201,6 +200,8 @@ namespace Chess.ChessModels
                 if (Board[startMove[0], startMove[1]].CheckSquare(Board, endMove))
                 {
                     Board[startMove[0], startMove[1]].MovePiece(Board, startMove, endMove);
+                    Console.WriteLine("The piece at " + square1 + " moved to " + square2 + ".");
+                    PrintBoard(Board);
                 }
                 else
                 {
@@ -211,7 +212,6 @@ namespace Chess.ChessModels
             {
                 Console.Error.WriteLine("Invalid piece movement, please try again...");
             }
-            Console.WriteLine("The piece at " + square1 + " moved to " + square2 + ".");
         }
         /// <summary>
         /// Moves a piece from it's start location to the desired location and captures
@@ -229,6 +229,8 @@ namespace Chess.ChessModels
                 if (Board[startMove[0], startMove[1]].CheckSquare(Board, endMove))
                 {
                     Board[startMove[0], startMove[1]].MovePiece(Board, startMove, endMove);
+                    Console.WriteLine("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
+                    PrintBoard(Board);
                 }
                 else
                 {
@@ -239,7 +241,6 @@ namespace Chess.ChessModels
             {
                 Console.Error.WriteLine("Invalid piece movement, please try again...");
             }
-            Console.WriteLine("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
         }
         /// <summary>
         /// Moves a King left/right 2 squares, while moving a Rook to the right/left of the King.
@@ -266,22 +267,10 @@ namespace Chess.ChessModels
         
         #region SetBoard
         /// <summary>
-        /// Sets empty board squares and pieces to there rightful location and color.
+        /// Creates a board of empty board squares and pieces to there rightful location and color.
         /// </summary>
         public void SetBoard()
         {
-            //Creates squares
-            for (int x = 0; x < 8; ++x)
-            {
-                Board[x, 0] = new Space();
-                Board[x, 1] = new Space();
-                Board[x, 2] = new Space();
-                Board[x, 3] = new Space();
-                Board[x, 4] = new Space();
-                Board[x, 5] = new Space();
-                Board[x, 6] = new Space();
-                Board[x, 7] = new Space();
-            }
             //Sets Black & White Pieces
             Board[0, 4] = new King('d');//Kings
             Board[7, 4] = new King('l');//Kings
@@ -318,6 +307,56 @@ namespace Chess.ChessModels
                     }
                 }
             }
+        }
+        #endregion
+
+        #region PrintBoard
+        /// <summary>
+        /// Prints out 8 array values before moving on to the next set of values.
+        /// This will continue essentially creating a board.
+        /// </summary>
+        /// <param name="boardSqaures">Represents a board. Required size for the 2-D array is 8 rows and 8 columns.</param>
+        public void PrintBoard(ChessPiece[,] boardSqaures)
+        {
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    if (x % 2 == 0)
+                    {
+                        if (y % 2 == 0)
+                        {
+                            Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                        }
+                        else
+                        {
+                            Console.BackgroundColor = ConsoleColor.DarkGreen;
+                        }
+                    }
+                    else
+                    {
+                        if (y % 2 == 0)
+                        {
+                            Console.BackgroundColor = ConsoleColor.DarkGreen;
+                        }
+                        else
+                        {
+                            Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                        }
+                    }
+                    if (boardSqaures[x, y].Color == 'l')
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    else if (boardSqaures[x, y].Color == 'd')
+                    {
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                    }
+                    Console.Write(" " + boardSqaures[x, y].Symbol + " ");
+                }
+                Console.WriteLine();
+            }
+            Console.ResetColor();
         }
         #endregion
 

@@ -6,29 +6,20 @@ namespace Chess.ChessModels
     public class Rook : ChessPiece
     {
         public char Color { get; set; }
-
         public string Piece { get; set; }
-
         public char Symbol { get; set; }
-
+        public bool[] canMove { get; set; }
         public Rook(char color)
         {
             Color = color;
             Piece = "Rook";
             Symbol = 'R';
+            ResetMovement();
         }
-        public bool CheckMovement(ChessPiece[,] board, int[] start, int[] end)
+        public void MovePiece(ChessPiece[,] board, int[] start, int[] end)
         {
-            bool isValid = false;
-            List<int[]> available = IsAvailable(start);
-            for (int x = 0; x < available.Count; ++x)
-            {
-                if (available[x][0] == end[0] && available[x][1] == end[1])
-                {
-                    isValid = true;
-                }
-            }
-            return isValid;
+            board[end[0], end[1]] = board[start[0], start[1]];
+            board[start[0], start[1]] = new Space();
         }
         public bool CheckSquare(ChessPiece[,] board, int[] end)
         {
@@ -43,34 +34,90 @@ namespace Chess.ChessModels
             }
             return isValid;
         }
-        public void MovePiece(ChessPiece[,] board, int[] start, int[] end)
+        public bool CheckMovement(ChessPiece[,] board, int[] start, int[] end)
         {
-            board[end[0], end[1]] = board[start[0], start[1]];
-            board[start[0], start[1]] = new Space();
+            bool isValid = false;
+            List<int[]> available = RestrictMovement(board, start);
+            for (int x = 0; x < available.Count; ++x)
+            {
+                if (available[x][0] == end[0] && available[x][1] == end[1])
+                {
+                    isValid = true;
+                }
+            }
+            ResetMovement();
+            return isValid;
         }
-        public List<int[]> IsAvailable(int[] start)
+        public List<int[]> RestrictMovement(ChessPiece[,] board, int[] start)
         {
             List<int[]> available = new List<int[]>();
-            for (int x = 0; x < 8; ++x)
+            bool isAvailable = false;
+            for (int x = 1; x < 8; ++x)
             {
-                if (start[0] + x < 8)//down 1
+                if (start[0] + x < 8)//down
                 {
-                    available.Add(new int[] { start[0] + x, start[1] });
+                    isAvailable = IsAvailable(board, start[0] + x, start[1], 0);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[0] == true)
+                        {
+                            available.Add(new int[] { start[0] + x, start[1] });
+                        }
+                    }
                 }
-                if (start[1] + x < 8)//right 1
+                if (start[1] + x < 8)//right
                 {
-                    available.Add(new int[] { start[0], start[1] + x });
+                    isAvailable = IsAvailable(board, start[0], start[1] + x, 1);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[3] == true)
+                        {
+                            available.Add(new int[] { start[0], start[1] + x });
+                        }
+                    }
                 }
-                if (start[0] - x >= 0)//up 1
+                if (start[0] - x >= 0)//up
                 {
-                    available.Add(new int[] { start[0] - x, start[1] });
+                    isAvailable = IsAvailable(board, start[0] - x, start[1], 2);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[4] == true)
+                        {
+                            available.Add(new int[] { start[0] - x, start[1] });
+                        }
+                    }
                 }
-                if (start[1] - x >= 0)//left 1
+                if (start[1] - x >= 0)//left
                 {
-                    available.Add(new int[] { start[0], start[1] - x });
+                    isAvailable = IsAvailable(board, start[0], start[1] - x, 3);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[7] == true)
+                        {
+                            available.Add(new int[] { start[0], start[1] - x });
+                        }
+                    }
                 }
             }
             return available;
         }
+        public bool IsAvailable(ChessPiece[,] board, int row, int column, int index)
+        {
+            bool canMove = true;
+            if (board[row, column].Color == Color)
+            {
+                canMove = false;
+            }
+            if (this.canMove[index] == true)
+            {
+                this.canMove[index] = canMove;
+            }
+            return canMove;
+        }
+        public void ResetMovement()
+        {
+            canMove = new bool[] { true, true, true, true};
+        }
+        /****************************/
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Chess.ChessControl;
+using System;
 
 namespace Chess
 {
@@ -9,6 +10,7 @@ namespace Chess
         #endregion
         public Program()
         {
+            Console.Title = "Chess";
             read = new Commands();
         }
         /// <summary>

@@ -1,5 +1,4 @@
 ﻿using Chess.ChessModels;
-using Chess.ChessView;
 using System;
 
 namespace Chess.ChessControl
@@ -8,12 +7,10 @@ namespace Chess.ChessControl
     {
         #region Variables
         private Utility util;
-        private Print print;
         #endregion
         public Commands()
         {
             util = new Utility();
-            print = new Print();
         }
         /// <summary>
         /// Reads in lines from a file and checks for commands.
@@ -21,7 +18,7 @@ namespace Chess.ChessControl
         /// <param name="line">A line from a file.</param>
         public void ReadLine(string line)
         {
-            print.PrintBoard(util.Board);
+            util.PrintBoard(util.Board);
             if (line.Length == util.Place_Piece)
             {
                 util.ProcessLine(line, @"([KQBNRP])([ld])([a-h])([1-8])");
@@ -38,7 +35,10 @@ namespace Chess.ChessControl
             {
                 util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])");
             }
-            print.PrintBoard(util.Board);
+            else
+            {
+                Console.WriteLine("Invalid command...");
+            }
             Console.WriteLine("<--------------------------------------------------->");
         }
         //-----------------------------------------------------------------------------------
