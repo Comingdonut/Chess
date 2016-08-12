@@ -1,8 +1,41 @@
-e1 d1
-d1 c2
-c2 c3
-c3 d4
-d4 e4
-e4 f3
-f3 f2
-f2 e1
+Rla1
+Nlb1
+Blc1
+Qld1
+Kle1
+Blf1
+Nlg1
+Rlh1
+Pla2
+Plb2
+Plc2
+Pld2
+Ple2
+Plf2
+Plg2
+Plh2
+Rda8
+Ndb8
+Bdc8
+Qdd8
+Kde8
+Bdf8
+Ndg8
+Rdh8
+Pda7
+Pdb7
+Pdc7
+Pdd7
+Pde7
+Pdf7
+Pdg7
+Pdh7
+//Pieces have been placed
+e2 e3
+e7 e6
+e1 e2
+e6 e5
+e2 d3
+e5 e4
+a2 a3
+e4 d3

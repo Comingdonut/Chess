@@ -18,7 +18,6 @@ namespace Chess.ChessControl
         /// <param name="line">A line from a file.</param>
         public void ReadLine(string line)
         {
-            util.PrintBoard(util.Board);
             if (line.Length == util.Place_Piece)
             {
                 util.ProcessLine(line, @"([KQBNRP])([ld])([a-h])([1-8])");
@@ -40,6 +39,8 @@ namespace Chess.ChessControl
                 Console.WriteLine("Invalid command...");
             }
             Console.WriteLine("<--------------------------------------------------->");
+            Console.WriteLine("It's Player " + util.Turn + "'s turn!");
+            util.Board.IsInCheck();
         }
         //-----------------------------------------------------------------------------------
     }

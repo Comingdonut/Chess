@@ -44,15 +44,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChessControl\Commands.cs" />
-    <Compile Include="ChessModels\Bishop.cs" />
-    <Compile Include="ChessModels\ChessPiece.cs" />
-    <Compile Include="ChessModels\King.cs" />
-    <Compile Include="ChessModels\Knight.cs" />
-    <Compile Include="ChessModels\Pawn.cs" />
-    <Compile Include="ChessModels\Queen.cs" />
-    <Compile Include="ChessModels\Rook.cs" />
-    <Compile Include="ChessModels\Space.cs" />
-    <Compile Include="ChessModels\Utility.cs" />
+    <Compile Include="ChessModels\ChessPieces\Bishop.cs" />
+    <Compile Include="ChessModels\Board\ChessBoard.cs" />
+    <Compile Include="ChessModels\Board\ChessColor.cs" />
+    <Compile Include="ChessModels\ChessPieces\ChessPiece.cs" />
+    <Compile Include="ChessModels\Board\ChessSquare.cs" />
+    <Compile Include="ChessModels\ChessPieces\King.cs" />
+    <Compile Include="ChessModels\ChessPieces\Knight.cs" />
+    <Compile Include="ChessModels\ChessPieces\Pawn.cs" />
+    <Compile Include="ChessModels\ChessPieces\Queen.cs" />
+    <Compile Include="ChessModels\ChessPieces\Rook.cs" />
+    <Compile Include="ChessModels\ChessPieces\Space.cs" />
+    <Compile Include="ChessModels\Other\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

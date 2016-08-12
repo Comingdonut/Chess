@@ -4,3 +4,9 @@ C:\Users\Donut\Dropbox\WorkSpace(Chess)\Chess\Chess\Chess\bin\Debug\Chess.pdb
 C:\Users\Donut\Dropbox\WorkSpace(Chess)\Chess\Chess\Chess\obj\Debug\Chess.csprojResolveAssemblyReference.cache
 C:\Users\Donut\Dropbox\WorkSpace(Chess)\Chess\Chess\Chess\obj\Debug\Chess.exe
 C:\Users\Donut\Dropbox\WorkSpace(Chess)\Chess\Chess\Chess\obj\Debug\Chess.pdb
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\bin\Debug\Chess.exe.config
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\obj\Debug\Chess.exe
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\obj\Debug\Chess.pdb
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\bin\Debug\Chess.exe
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\bin\Debug\Chess.pdb
+C:\Users\Donut\Desktop\ChessCodeReview\ChessReview\Chess\obj\Debug\Chess.csprojResolveAssemblyReference.cache
