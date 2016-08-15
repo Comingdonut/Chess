@@ -27,19 +27,6 @@ namespace Chess.ChessModels
             board[end[0], end[1]].Piece = board[start[0], start[1]].Piece;
             board[start[0], start[1]].Piece = new Space();
         }
-        public override bool CheckSquare(ChessSquare[,] board, int[] end)
-        {
-            bool isValid = false;
-            if (board[end[0], end[1]].Piece.GetType() == typeof(Space))
-            {
-                isValid = true;
-            }
-            else if (board[end[0], end[1]].Piece.Color != Color)
-            {
-                isValid = true;
-            }
-            return isValid;
-        }
         public override bool CheckMovement(ChessSquare[,] board, int[] start, int[] end)
         {
             bool isValid = false;

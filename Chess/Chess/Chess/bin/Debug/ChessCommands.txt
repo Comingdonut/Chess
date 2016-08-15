@@ -31,11 +31,10 @@ Pdf7
 Pdg7
 Pdh7
 //Pieces have been placed
-e2 e3
-e7 e6
-e1 e2
-e6 e5
-e2 d3
-e5 e4
-a2 a3
-e4 d3
+a2 a4
+a7 a5
+a4 a6
+a4 a5
+b2 b4
+a5 b4
+a1 a4

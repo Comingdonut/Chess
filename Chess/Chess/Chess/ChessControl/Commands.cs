@@ -24,23 +24,32 @@ namespace Chess.ChessControl
             }
             else if (line.Length == util.Move_Piece)
             {
+                Print();
                 util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])");
             }
             else if (line.Length == util.Capture_Piece)
             {
+                Print();
                 util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])");
             }
             else if (line.Length == util.King_Side_Piece)
             {
+                Print();
                 util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])");
             }
             else
             {
                 Console.WriteLine("Invalid command...");
             }
+        }
+        /// <summary>
+        /// Prints out who's turn it is, a line used to make the console readable and the king's status.
+        /// </summary>
+        public void Print()
+        {
             Console.WriteLine("<--------------------------------------------------->");
             Console.WriteLine("It's Player " + util.Turn + "'s turn!");
-            util.Board.IsInCheck();
+            util.Board.IsInCheckMate(util.Turn);
         }
         //-----------------------------------------------------------------------------------
     }

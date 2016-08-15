@@ -8,13 +8,13 @@ namespace Chess.ChessModels
 {
     public class ChessBoard
     {
+        //A 2-D Array of squares essentially creating a board.
         public ChessSquare[,] Squares { get; set; }
         public ChessBoard()
         {
             CreateSquares();
-            AddPieces();
         }
-        #region SetBoard
+        #region Board
         /// <summary>
         /// Creates a board of empty board squares.
         /// </summary>
@@ -29,68 +29,42 @@ namespace Chess.ChessModels
                 for (int y = 0; y < 8; y++)
                 {
                     Squares[x, y] = new ChessSquare(x, y, color);
+                    //Spaces
+                    if (Squares[x, y].Piece == null)
+                    {
+                        Squares[x, y].Piece = new Space();
+                    }
                     color = ChangeColor(color);
                 }
                 color = ChangeColor(color);
             }
         }
         /// <summary>
-        /// Add pieces to the board squares.
-        /// </summary>
-        public void AddPieces()
-        {
-            //Sets Black & White Pieces
-            //Squares[0, 4].Piece = new King(ChessColor.DARK);//Kings
-            //Squares[7, 4].Piece = new King(ChessColor.LIGHT);//Kings
-            //Squares[0, 3].Piece = new Queen(ChessColor.DARK);//Queens
-            //Squares[7, 3].Piece = new Queen(ChessColor.LIGHT);//Queens
-            //for (int x = 2; x < 6; x += 3)
-            //{
-            //    Squares[0, x].Piece = new Bishop(ChessColor.DARK);//Black Bishops
-            //    Squares[7, x].Piece = new Bishop(ChessColor.LIGHT);//White Bishops
-            //}
-            //for (int x = 1; x < 7; x += 5)
-            //{
-            //    Squares[0, x].Piece = new Knight(ChessColor.DARK);//Black Knight
-            //    Squares[7, x].Piece = new Knight(ChessColor.LIGHT);//White Knight
-            //}
-            //for (int x = 0; x < 9; x += 7)
-            //{
-            //    Squares[0, x].Piece = new Rook(ChessColor.DARK);//Black Rooks
-            //    Squares[7, x].Piece = new Rook(ChessColor.LIGHT);//White Rooks
-            //}
-            //for (int x = 0; x < 8; x++)
-            //{
-            //    Squares[1, x].Piece = new Pawn(ChessColor.DARK);//Black Pawns
-            //    Squares[6, x].Piece = new Pawn(ChessColor.LIGHT);//White Pawns
-            //}
-            //Empty squares
-            for (int x = 0; x < 8; ++x)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    if (Squares[x, y].Piece == null)
-                    {
-                        Squares[x, y].Piece = new Space();
-                    }
-                }
-            }
-        }
-        /// <summary>
         /// Changes color to it's opposite value.
         /// </summary>
-        /// <param name="color">Returns the opposite value.</param>
-        /// <returns></returns>
+        /// <param name="color">Represents a color that will be changed to it's opposites.</param>
+        /// <returns>Returns the opposite color, then the color passed in the parameter.</returns>
         public ChessColor ChangeColor(ChessColor color)
         {
             ChessColor newColor = color == ChessColor.LIGHT ? ChessColor.DARK : ChessColor.LIGHT;
             return newColor;
         }
         /// <summary>
-        /// Prints out 8 array values before moving on to the next set of values.
-        /// This will continue essentially creating a board.
+        /// Loops through the board, prints out 8 array values before moving on to the next set of values.
+        /// This will continue, essentially printing out the board.
+        /// 
+        /// If the color of a board square is light, then it is set to gray.
+        /// If it's dark, then it's set to dark gray.
+        /// If there is no color, then its does nothing.
+        /// 
+        /// If the board square has a piece, then it sets the forground color the pieces
+        /// respective color. So light gets a font solor of white and dark gets a font
+        /// color of black. It prints out the pieces respective symbol.
+        /// If the board square does not have a piece, it prints out 3 spaces representing a an empty
+        /// square.
+        /// 
+        /// After all this, the backgroung and froeground color get reset to their defaults.
         /// </summary>
-        /// <param name="boardSqaures">Represents a board. Required size for the 2-D array is 8 rows and 8 columns.</param>
         public void PrintBoard()
         {
             for (int x = 0; x < 8; ++x)//Loop for rows of 2-D Arr
@@ -123,58 +97,68 @@ namespace Chess.ChessModels
         #endregion
 
         #region Checks
-        
-        public void IsInCheck()
+        /// <summary>
+        /// Grabs all available legal moves from every piece and checks if a avialable legal move from that piece can kill a king.
+        /// Prints out the kings status.
+        /// </summary>
+        ///<returns>
+        ///True: If a piece can move to kill a king.
+        ///False: If no move can capture a king.
+        /// </returns>
+        public bool IsInCheck()
         {
-            List<int[]> available = new List<int[]>();
+            List<int[]> availableMovements = new List<int[]>();//A storage for all possible legal move for the pieces.
             List<int[]> Pieces = new List<int[]>();
-            int[] lKing = new int[2];
-            int[] dKing = new int[2];
-            string status = "";
+            int[] lKing = new int[2];//Light king's location.
+            int[] dKing = new int[2];//Dark king's location.
+            bool inCheck = false;
+            string status = "";//The status of the king.
             for (int x = 0; x < 8; ++x)
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    int[] pieceLocation = new int[] { x, y };//Current piece location, will eventually loopthrough all pieces
-                    List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, pieceLocation);//Gets all possible moves for current piece
+                    int[] pieceLocation = new int[] { x, y };//Gets the current piece's location, which will eventually loop through all pieces.
+                    List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, pieceLocation);//Gets all possible legal moves for current piece.
                     for (int j = 0; j < placeHold.Count; ++j)
                     {
-                        available.Add(placeHold[j]);//Adds all possible legal movements for the current piece
-                        Pieces.Add(pieceLocation);//Contains all pieces with legal moves
+                        availableMovements.Add(placeHold[j]);//Adds all possible legal movements from the current piece being looped through.
+                        Pieces.Add(pieceLocation);//Contains all piece's that have legal moves.
                     }
                     if (Squares[x, y].Piece.GetType() == typeof(King))
                     {
                         if (Squares[x, y].Piece.Color == ChessColor.LIGHT)
                         {
-                            lKing = new int[] { x, y };//stores the king in a special place ;)
+                            lKing = new int[] { x, y };//Stores the light king's location.
                         }
                         else
                         {
-                            dKing = new int[] { x, y };//stores the king in a special place ;)
+                            dKing = new int[] { x, y };//Stores the dark king's location.
                         }
                     }
                 }
             }
-            for (int x = 0; x < available.Count; ++x)
+            for (int x = 0; x < availableMovements.Count; ++x)//Loops through all possible legal moves.
             {
-                string[] word = GrabPiece(available[x][0], available[x][1]);
-                if (available[x][0] == lKing[0] && available[x][1] == lKing[1])
+                string[] word = GrabPiece(availableMovements[x][0], availableMovements[x][1]);//Word is equal to a move.
+                if (availableMovements[x][0] == lKing[0] && availableMovements[x][1] == lKing[1])//If a move is the same as the light king's location.
                 {
                     Console.WriteLine("Light King's Status: In danger\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
                                 Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Piece,
                                 word[0], word[1],
                                 Squares[lKing[0], lKing[1]].Piece.Color.ToString(), Squares[lKing[0], lKing[1]].Piece.Piece);
                     status = " ";
+                    inCheck = true;
                 }
-                else if (available[x][0] == dKing[0] && available[x][1] == dKing[1])
+                else if (availableMovements[x][0] == dKing[0] && availableMovements[x][1] == dKing[1])//If a move is the same as the dark king's location.
                 {
                     Console.WriteLine("Dark King's Status: In danger\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
                                 Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Piece,
                                 word[0], word[1],
                                 Squares[dKing[0], dKing[1]].Piece.Color.ToString(), Squares[dKing[0], dKing[1]].Piece.Piece);
                     status = " ";
+                    inCheck = true;
                 }
-                else
+                else//if status is a space the print out that the king is safe.
                 {
                     if(status != " ")
                     {
@@ -187,13 +171,81 @@ namespace Chess.ChessModels
                 //            Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Piece, word[0], word[1]);
                 //}
             }
-            if (status != " ")
+            if (status != " ")//If status is not a space the print out status
             {
                 Console.WriteLine(status);
             }
+            return inCheck;
         }
         /// <summary>
-        /// Reads in a column int and row int to convert and store it in an Array.
+        /// Checks if a player is in check.
+        /// If they are, then it determines if the king has no way to get out of check.
+        /// Prints out check mate if the king is surrounded.
+        /// </summary>
+        /// <param name="turn">An int representing a player's turn.</param>
+        public void IsInCheckMate(int turn)
+        {
+            List<int[]> kingsMoves = new List<int[]>();
+            List<int[]> enemyMoves = new List<int[]>();
+            bool inCheck = IsInCheck();
+            int[] king = new int[2];//The king(that is in check)'s location.
+            if (inCheck == true)//If check has occurred.
+            {
+                for (int x = 0; x < 8; ++x)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        if (Squares[x, y].Piece.GetType() == typeof(King))//Loops through every piece searching for the king in check.
+                        {
+                            if ((int)Squares[x, y].Piece.Color == turn)//Makes sure the color of the king is that of the current player's turn.
+                            {
+                                king = new int[] { x, y };//Stores the king's location.
+                            }
+                        }
+                    }
+                }//End of the for loop
+                kingsMoves = Squares[king[0], king[1]].Piece.RestrictMovement(Squares, king);//Stores the kings movements.
+                for (int x = 0; x < 8; ++x)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        if ((int)Squares[x, y].Piece.Color != turn)
+                        {
+                            List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, new int[] { x, y });//Gets all possible legal moves for current enemy piece.
+                            for (int j = 0; j < placeHold.Count; ++j)
+                            {
+                                enemyMoves.Add(placeHold[j]);//Adds all possible legal movements from the enemy piece being looped through.
+                            }
+                        }
+                    }
+                }//End of the for loop
+                bool[] cantMove = new bool[kingsMoves.Count];//Sets a bool array length to the kingsMoves length.
+                for (int j = 0; j < enemyMoves.Count; ++j)
+                {
+                    for (int k = 0; k < kingsMoves.Count; ++k)
+                    {
+                        if (enemyMoves[j][0] == kingsMoves[k][0] && enemyMoves[j][1] == kingsMoves[k][1])//Checks if any of the kings movements will make the king go back in check
+                        {
+                            cantMove[k] = true;
+                        }
+                    }
+                }//End of the for loop
+                int num = 0;
+                for (int z = 0; z < cantMove.Count(); ++z)
+                {
+                    if (cantMove[z] == true)//checks if all of kings moves will make him captured
+                    {
+                        ++num;
+                    }
+                }//End of the for loop
+                if (num == cantMove.Length)//If all the kings movements will cause the king to get captures
+                {
+                    Console.WriteLine("Checkmate!!!");
+                }
+            }
+        }
+        /// <summary>
+        /// Reads in a column int and row int to convert and store it to an Array.
         /// </summary>
         /// <param name="column">Column number from a 2-D Array.</param>
         /// <param name="row">Row number from a 2-D Array.</param>

@@ -4,11 +4,25 @@ namespace Chess.ChessModels
 {
     public abstract class ChessPiece
     {
+        #region Variables
+        /// <summary>
+        /// A string that contains the name of the piece.
+        /// </summary>
         public string Piece { get; set; }
+        /// <summary>
+        /// A symbol that contains the Abbreviation of the piece.
+        /// </summary>
         public char Symbol { get; set; }
+        /// <summary>
+        /// The color of the piece.
+        /// </summary>
         public ChessColor Color { get; set; }
+        /// <summary>
+        /// A bool array that has value turn true if a specific move for the piece is possible.
+        /// The length of the array is set to the amount of all possible move directions for the piece.
+        /// </summary>
         public bool[] canMove { get; set; }
-
+        #endregion
         public ChessPiece()
         {
 
@@ -29,17 +43,6 @@ namespace Chess.ChessModels
         /// True: If the desired square is empty or has an enemy piece.
         /// False: If the desired square already contains a friendly piece.
         /// </returns>
-        public abstract bool CheckSquare(ChessSquare[,] board, int[] end);
-        /// <summary>
-        /// Checks if a piece's end point is a valid move.
-        /// </summary>
-        /// <param name="board">A 2-Dimesional array of ints representing the board.</param>
-        /// <param name="start">A int array containing the starting postion for the piece.</param>
-        /// <param name="end">A int array containg the end position for the piece.</param>
-        /// <returns>
-        /// True: if the deisred location is a valid move for the piece.
-        /// False: if the desired location is not a valid move for the piece.
-        /// </returns>
         public abstract bool CheckMovement(ChessSquare[,] board, int[] start, int[] end);
         /// <summary>
         /// Checks if movement does not go off the board.
@@ -59,7 +62,7 @@ namespace Chess.ChessModels
         /// <returns></returns>
         public abstract bool IsAvailable(ChessSquare[,] board, int row, int column, int index);
         /// <summary>
-        /// Resets the possible movements.
+        /// Resets the bool array, so all moves are possible.
         /// </summary>
         public abstract void ResetMovement();
     }

@@ -13,16 +13,18 @@ namespace Chess.ChessModels
         private const int KING_SIDE_PIECE = 11;
         //Total squares on the board
         private const int PIECE_COUNT = 32;
-
-        private string _piece;
-        private string _color;
+        //The Chess Board
         private ChessBoard _board;
+        //A chess piece that can be set to any piece and color.
         private ChessPiece _pieceHolder;
+        //Reprents the start location of a piece and the end location for a piece being moved.
         private int[] startMove;
         private int[] endMove;
+        //Player's turn by defaults starts at 1.
         private int _turn = 1;
+        //A count representing the number of pieces on the board when placing pieces.
+        //Will never go down.
         private int _pieceCount = 0;
-        private bool inCheck;
         #endregion
         public Utility()
         {
@@ -33,7 +35,7 @@ namespace Chess.ChessModels
         #region Check Piece/Color
         /// <summary>
         /// Checks the parameter if it represents a board piece.
-        /// If it does, then it sets _pieceHolder to a the board piece.
+        /// If it does, then it sets _pieceHolder to the board piece.
         /// </summary>
         /// <param name="piece">
         /// K = King
@@ -43,53 +45,42 @@ namespace Chess.ChessModels
         /// R = Rook
         /// P = Pawn
         /// </param>
-        /// <returns>Returns the name of a board piece</returns>
-        public string CheckPiece(string piece)
+        public void CheckPiece(string piece)
         {
-            string name;
             switch (piece)
             {
                 case "K":
                     _pieceHolder = new King();
-                    name = _pieceHolder.Piece;
                     break;
                 case "Q":
                     _pieceHolder = new Queen();
-                    name = _pieceHolder.Piece;
                     break;
                 case "B":
                     _pieceHolder = new Bishop();
-                    name = _pieceHolder.Piece;
                     break;
                 case "N":
                     _pieceHolder = new Knight();
-                    name = _pieceHolder.Piece;
                     break;
                 case "R":
                     _pieceHolder = new Rook();
-                    name = _pieceHolder.Piece;
                     break;
                 case "P":
                     _pieceHolder = new Pawn();
-                    name = _pieceHolder.Piece;
                     break;
                 default:
                     Console.Error.WriteLine("Invalid Piece");
-                    name = null;
                     break;
             }
-            return name;
         }
         /// <summary>
         /// Checks the parameter if represents a color.
-        /// If it does, then it sets _placeHolder's color to to the paremeter.
+        /// If it does, then it sets _placeHolder's color to the paremeter.
         /// </summary>
         /// <param name="color">
-        /// l = "Light"
+        /// l = "Light",
         /// d = "Dark"
         /// </param>
-        /// <returns>Returns dark or light depending on the paremeter.</returns>
-        public string CheckColor(string color)
+        public void CheckColor(string color)
         {
             ChessColor brush;
             switch (color)
@@ -104,13 +95,13 @@ namespace Chess.ChessModels
                     throw new Exception("Invalid color character...");
             }
             _pieceHolder.Color = brush;
-            return brush.ToString();
         }
         #endregion
 
         #region Grab/Place/Move/Capture Piece
         /// <summary>
-        /// Reads in a column letter and row number to convert and store it in an Array.
+        /// Reads in a column letter and row number to convert it to a 2-D array
+        /// cordinates and stores it in an Array.
         /// </summary>
         /// <param name="column">Column letter from a chess board.</param>
         /// <param name="row">Row number from a chess board.</param>
@@ -155,13 +146,14 @@ namespace Chess.ChessModels
         /// <summary>
         /// Places the desired colored piece to the desired space on the board.
         /// Prints out a sentence regarding where the piece has been placed.
+        /// prints out the board when all pieces have been placed.
         /// </summary>
         /// <param name="square">Represents a square that will be holding the new piece.</param>
         public void PlacePiece(string square1)
         {
             startMove = GrabPiece(square1[0], square1[1]);
             Board.Squares[startMove[0], startMove[1]].Piece = _pieceHolder;
-            Console.WriteLine(Color + " " + _pieceHolder.Piece + " has been placed at " + square1 + ".");
+            Console.WriteLine(_pieceHolder.Color.ToString() + " " + _pieceHolder.Piece + " has been placed at " + square1 + ".");
             ++_pieceCount;
             if (_pieceCount == PIECE_COUNT)
             {
@@ -169,6 +161,10 @@ namespace Chess.ChessModels
             }
         }
         /// <summary>
+        /// If the color of the desired piece is in line with the current player's turn,
+        /// then it checks the movements of the piece to see if the new location for
+        /// the piece is a legal move.
+        /// 
         /// Moves a piece from it's start location to the desired location.
         /// Prints out where the piece moved too, in plain english.
         /// </summary>
@@ -182,17 +178,17 @@ namespace Chess.ChessModels
             {
                 if (Board.Squares[startMove[0], startMove[1]].Piece.CheckMovement(Board.Squares, startMove, endMove) == true)
                 {
-                    if (Board.Squares[startMove[0], startMove[1]].Piece.CheckSquare(Board.Squares, endMove))
-                    {
+                    //if (Board.Squares[startMove[0], startMove[1]].Piece.CheckSquare(Board.Squares, endMove))
+                    //{
                         Board.Squares[startMove[0], startMove[1]].Piece.MovePiece(Board.Squares, startMove, endMove);
                         Console.WriteLine("The piece at " + square1 + " moved to " + square2 + ".");
                         Board.PrintBoard();
                         ChangeTurn();
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("You can not capture your own piece, please try again...");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    Console.Error.WriteLine("You can not capture your own piece, please try again...");
+                    //}
                 }
                 else
                 {
@@ -205,6 +201,10 @@ namespace Chess.ChessModels
             }
         }
         /// <summary>
+        /// If the color of the desired piece is in line with the current player's turn,
+        /// then it checks the movements of the piece to see if the new location for
+        /// the piece is a legal move.
+        /// 
         /// Moves a piece from it's start location to the desired location and captures
         /// the piece.
         /// Prints out where the piece moved too, in plain english.
@@ -220,17 +220,17 @@ namespace Chess.ChessModels
             {
                 if (Board.Squares[startMove[0], startMove[1]].Piece.CheckMovement(Board.Squares, startMove, endMove) == true)
                 {
-                    if (Board.Squares[startMove[0], startMove[1]].Piece.CheckSquare(Board.Squares, endMove))
-                    {
+                    //if (Board.Squares[startMove[0], startMove[1]].Piece.CheckSquare(Board.Squares, endMove))
+                    //{
                         Board.Squares[startMove[0], startMove[1]].Piece.MovePiece(Board.Squares, startMove, endMove);
                         Console.WriteLine("The piece at " + square1 + " captured the piece at and moved to " + square2 + ".");
                         Board.PrintBoard();
                         ChangeTurn();
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("You can not capture your own piece, please try again...");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    Console.Error.WriteLine("You can not capture your own piece, please try again...");
+                    //}
                 }
                 else
                 {
@@ -268,8 +268,8 @@ namespace Chess.ChessModels
 
         #region ProcessLine
         /// <summary>
-        /// Reads a line that contains commands for chess and
-        /// writes out the commands in readable english.
+        /// Reads a line that contains commands for chess and passes them
+        /// to other methods that will print them out in readable english.
         /// </summary>
         /// <param name="input">A line from a file.</param>
         /// <param name="pattern">A pattern to interpret the line.</param>
@@ -281,8 +281,8 @@ namespace Chess.ChessModels
             {
                 if (match.Length == PLACE_PIECE)
                 {
-                    Piece = CheckPiece(match.Groups[1].Value);
-                    Color = CheckColor(match.Groups[2].Value);
+                    CheckPiece(match.Groups[1].Value);
+                    CheckColor(match.Groups[2].Value);
                     PlacePiece(match.Groups[3].Value + "" + match.Groups[4].Value);
                 }
                 else if (match.Length == MOVE_PIECE)
@@ -319,13 +319,29 @@ namespace Chess.ChessModels
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Command Length of 4.
+        /// </summary>
         public int Place_Piece { get { return PLACE_PIECE; } }
+        /// <summary>
+        /// Command Length of 5.
+        /// </summary>
         public int Move_Piece { get { return MOVE_PIECE; } }
+        /// <summary>
+        /// Command Length of 6.
+        /// </summary>
         public int Capture_Piece { get { return CAPTURE_PIECE; } }
+        /// <summary>
+        /// Command Length of 11.
+        /// </summary>
         public int King_Side_Piece { get { return KING_SIDE_PIECE; } }
-        public string Piece { get { return _piece; } private set { _piece = value; } }
-        public string Color { get { return _color; } private set { _color = value; } }
+        /// <summary>
+        /// Represents the chess board.
+        /// </summary>
         public ChessBoard Board { get { return _board; } }
+        /// <summary>
+        /// Represents the current Player's turn.
+        /// </summary>
         public int Turn { get {return _turn; } private set {_turn = value; } }
         #endregion
         //-----------------------------------------------------------------------------------

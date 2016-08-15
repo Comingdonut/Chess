@@ -5,6 +5,7 @@ namespace Chess.ChessModels
 {
     public class Pawn : ChessPiece
     {
+        private int _moves;
         public Pawn()
         {
             Init();
@@ -21,24 +22,12 @@ namespace Chess.ChessModels
             Piece = "Pawn";
             Symbol = 'P';
             ResetMovement();
+            _moves = 0;
         }
         public override void MovePiece(ChessSquare[,] board, int[] start, int[] end)
         {
             board[end[0], end[1]].Piece = board[start[0], start[1]].Piece;
             board[start[0], start[1]].Piece = new Space();
-        }
-        public override bool CheckSquare(ChessSquare[,] board, int[] end)
-        {
-            bool isValid = false;
-            if (board[end[0], end[1]].Piece.GetType() == typeof(Space))
-            {
-                isValid = true;
-            }
-            else if (board[end[0], end[1]].Piece.Color != Color)
-            {
-                isValid = true;
-            }
-            return isValid;
         }
         public override bool CheckMovement(ChessSquare[,] board, int[] start, int[] end)
         {
@@ -50,6 +39,7 @@ namespace Chess.ChessModels
                 if (available[x][0] == end[0] && available[x][1] == end[1])
                 {
                     isValid = true;
+                    ++_moves;
                 }
             }
             return isValid;
@@ -62,12 +52,23 @@ namespace Chess.ChessModels
             {
                 if (start[0] + 1 < 8)//down 1
                 {
-                    isAvailable = IsAvailable(board, start[0] + 1, start[1], 0);
+                    isAvailable = IsEmpty(board, start[0] + 1, start[1], 0);
                     if (isAvailable == true)
                     {
                         if (canMove[0] == true)
                         {
                             available.Add(new int[] { start[0] + 1, start[1] });
+                        }
+                    }
+                }
+                if (_moves == 0)//down 2
+                {
+                    isAvailable = IsEmpty(board, start[0] + 2, start[1], 6);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[0] == true)
+                        {
+                            available.Add(new int[] { start[0] + 2, start[1] });
                         }
                     }
                 }
@@ -104,12 +105,23 @@ namespace Chess.ChessModels
             {
                 if (start[0] - 1 >= 0)//up 1
                 {
-                    isAvailable = IsAvailable(board, start[0] - 1, start[1], 3);
+                    isAvailable = IsEmpty(board, start[0] - 1, start[1], 3);
                     if (isAvailable == true)
                     {
                         if (canMove[3] == true)
                         {
                             available.Add(new int[] { start[0] - 1, start[1] });
+                        }
+                    }
+                }
+                if (_moves == 0)//up 2
+                {
+                    isAvailable = IsEmpty(board, start[0] - 2, start[1], 7);
+                    if (isAvailable == true)
+                    {
+                        if (canMove[3] == true)
+                        {
+                            available.Add(new int[] { start[0] - 2, start[1] });
                         }
                     }
                 }
@@ -157,9 +169,22 @@ namespace Chess.ChessModels
             }
             return canMove;
         }
+        public bool IsEmpty(ChessSquare[,] board, int row, int column, int index)
+        {
+            bool canMove = true;
+            if (board[row, column].Piece.Color != ChessColor.NONE)
+            {
+                canMove = false;
+            }
+            if (this.canMove[index] == true)
+            {
+                this.canMove[index] = canMove;
+            }
+            return canMove;
+        }
         public override void ResetMovement()
         {
-            canMove = new bool[] { true, true, true, true, true, true};
+            canMove = new bool[] { true, true, true, true, true, true, true, true};
         }
         /****************************/
     }
