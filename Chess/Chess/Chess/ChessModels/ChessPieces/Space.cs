@@ -8,9 +8,9 @@ namespace Chess.ChessModels
         {
             Color = ChessColor.NONE;
         }
-        public override void MovePiece(ChessSquare[,] board, int[] start, int[] end) { }
-        public override bool CheckMovement(ChessSquare[,] board, int[] start, int[] end) { return false; }
-        public override List<int[]> RestrictMovement(ChessSquare[,] board, int[] start) { return new List<int[]>(); }
+        public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY) { }
+        public override bool CheckMovement(ChessSquare[,] board, int startX, int startY, int endX, int endY) { return false; }
+        public override List<int[]> RestrictMovement(ChessSquare[,] board, int startX, int startY) { return new List<int[]>(); }
         public override bool IsAvailable(ChessSquare[,] board, int row, int column, int index) { return false; }
         public override void ResetMovement() { }
         /****************************/

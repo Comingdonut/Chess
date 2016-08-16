@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chess.ChessModels.Other;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,12 @@ namespace Chess.ChessModels
 {
     public class ChessSquare
     {
-        public ChessSquare(int vertical, int horizontal, ChessColor color)
+        public ChessSquare(int y, int x, ChessColor color)
         {
-           Vertical = vertical;
-           Horizontal = horizontal;
-           Color = color;
+            Loc = new Location();
+            Loc.Y = y;
+            Loc.X = x;
+            Color = color;
         }
         /// <summary>
         /// The color of the square.
@@ -23,12 +25,8 @@ namespace Chess.ChessModels
         /// </summary>
         public ChessPiece Piece { get; set; }
         /// <summary>
-        /// The column location of the square on the board.
+        /// The location of the square on the board.
         /// </summary>
-        public int Vertical { get; set; }
-        /// <summary>
-        /// The row location of the square on the board.
-        /// </summary>
-        public int Horizontal { get; set; }
+        public Location Loc { get; set; }
     }
 }

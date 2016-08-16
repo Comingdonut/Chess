@@ -8,7 +8,7 @@ namespace Chess.ChessModels
         /// <summary>
         /// A string that contains the name of the piece.
         /// </summary>
-        public string Piece { get; set; }
+        public string Name { get; set; }
         /// <summary>
         /// A symbol that contains the Abbreviation of the piece.
         /// </summary>
@@ -33,7 +33,7 @@ namespace Chess.ChessModels
         /// <param name="board">A 2-Dimesional array of ints representing the board.</param>
         /// <param name="start">A int array containing the starting postion for the piece.</param>
         /// <param name="end">A int array containg the end position for the piece.</param>
-        public abstract void MovePiece(ChessSquare[,] board, int[] start, int[] end);
+        public abstract void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY);
         /// <summary>
         /// Checks if the desired location is an empty square and a piece of a different color.
         /// </summary>
@@ -43,13 +43,13 @@ namespace Chess.ChessModels
         /// True: If the desired square is empty or has an enemy piece.
         /// False: If the desired square already contains a friendly piece.
         /// </returns>
-        public abstract bool CheckMovement(ChessSquare[,] board, int[] start, int[] end);
+        public abstract bool CheckMovement(ChessSquare[,] board, int startX, int startY, int endX, int endY);
         /// <summary>
         /// Checks if movement does not go off the board.
         /// </summary>
         /// <param name="start">A int array containing the starting postion for the piece.</param>
         /// <returns>Returns a list of valid movements for the piece.</returns>
-        public abstract List<int[]> RestrictMovement(ChessSquare[,] board, int[] start);
+        public abstract List<int[]> RestrictMovement(ChessSquare[,] board, int startX, int startY);
         /// <summary>
         /// Checks if a movement option for a piece is empty or has an enemy piece.
         /// If it has a ally piece, then it can not move pass the piece unless it is

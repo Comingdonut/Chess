@@ -19,24 +19,24 @@ namespace Chess.ChessModels
 
         private void Init()
         {
-            Piece = "Pawn";
+            Name = "Pawn";
             Symbol = 'P';
             ResetMovement();
             _moves = 0;
         }
-        public override void MovePiece(ChessSquare[,] board, int[] start, int[] end)
+        public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
-            board[end[0], end[1]].Piece = board[start[0], start[1]].Piece;
-            board[start[0], start[1]].Piece = new Space();
+            board[endX, endY].Piece = board[startX, startY].Piece;
+            board[startX, startY].Piece = new Space();
         }
-        public override bool CheckMovement(ChessSquare[,] board, int[] start, int[] end)
+        public override bool CheckMovement(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             ResetMovement();
             bool isValid = false;
-            List<int[]> available = RestrictMovement(board, start);
+            List<int[]> available = RestrictMovement(board, startX, startY);
             for (int x = 0; x < available.Count; ++x)
             {
-                if (available[x][0] == end[0] && available[x][1] == end[1])
+                if (available[x][0] == endX && available[x][1] == endY)
                 {
                     isValid = true;
                     ++_moves;
@@ -44,58 +44,58 @@ namespace Chess.ChessModels
             }
             return isValid;
         }
-        public override List<int[]> RestrictMovement(ChessSquare[,] board, int[] start)
+        public override List<int[]> RestrictMovement(ChessSquare[,] board, int startX, int startY)
         {
             List<int[]> available = new List<int[]>();
             bool isAvailable = false;
             if (Color == ChessColor.DARK)
             {
-                if (start[0] + 1 < 8)//down 1
+                if (startX + 1 < 8)//down 1
                 {
-                    isAvailable = IsEmpty(board, start[0] + 1, start[1], 0);
+                    isAvailable = IsEmpty(board, startX + 1, startY, 0);
                     if (isAvailable == true)
                     {
                         if (canMove[0] == true)
                         {
-                            available.Add(new int[] { start[0] + 1, start[1] });
+                            available.Add(new int[] { startX + 1, startY });
                         }
                     }
                 }
                 if (_moves == 0)//down 2
                 {
-                    isAvailable = IsEmpty(board, start[0] + 2, start[1], 6);
+                    isAvailable = IsEmpty(board, startX + 2, startY, 6);
                     if (isAvailable == true)
                     {
                         if (canMove[0] == true)
                         {
-                            available.Add(new int[] { start[0] + 2, start[1] });
+                            available.Add(new int[] { startX + 2, startY });
                         }
                     }
                 }
-                if (start[0] + 1 < 8 && start[1] - 1 >= 0)//down Left 1
+                if (startX + 1 < 8 && startY - 1 >= 0)//down Left 1
                 {
-                    if (board[start[0] + 1, start[1] - 1].Piece.Color != Color && board[start[0] + 1, start[1] - 1].Piece.Color != ChessColor.NONE)
+                    if (board[startX + 1, startY - 1].Piece.Color != Color && board[startX + 1, startY - 1].Piece.Color != ChessColor.NONE)
                     {
-                        isAvailable = IsAvailable(board, start[0] + 1, start[1] - 1, 1);
+                        isAvailable = IsAvailable(board, startX + 1, startY - 1, 1);
                         if (isAvailable == true)
                         {
                             if (canMove[1] == true)
                             {
-                                available.Add(new int[] { start[0] + 1, start[1] - 1 });
+                                available.Add(new int[] { startX + 1, startY - 1 });
                             }
                         }
                     }
                 }
-                if (start[0] + 1 < 8 && start[1] + 1 < 8)//down right 1
+                if (startX + 1 < 8 && startY + 1 < 8)//down right 1
                 {
-                    if (board[start[0] + 1, start[1] + 1].Piece.Color != Color && board[start[0] + 1, start[1] + 1].Piece.Color != ChessColor.NONE)
+                    if (board[startX + 1, startY + 1].Piece.Color != Color && board[startX + 1, startY + 1].Piece.Color != ChessColor.NONE)
                     {
-                        isAvailable = IsAvailable(board, start[0] + 1, start[1] + 1, 2);
+                        isAvailable = IsAvailable(board, startX + 1, startY + 1, 2);
                         if (isAvailable == true)
                         {
                             if (canMove[2] == true)
                             {
-                                available.Add(new int[] { start[0] + 1, start[1] + 1 });
+                                available.Add(new int[] { startX + 1, startY + 1 });
                             }
                         }
                     }
@@ -103,52 +103,52 @@ namespace Chess.ChessModels
             }
             else
             {
-                if (start[0] - 1 >= 0)//up 1
+                if (startX - 1 >= 0)//up 1
                 {
-                    isAvailable = IsEmpty(board, start[0] - 1, start[1], 3);
+                    isAvailable = IsEmpty(board, startX - 1, startY, 3);
                     if (isAvailable == true)
                     {
                         if (canMove[3] == true)
                         {
-                            available.Add(new int[] { start[0] - 1, start[1] });
+                            available.Add(new int[] { startX - 1, startY });
                         }
                     }
                 }
                 if (_moves == 0)//up 2
                 {
-                    isAvailable = IsEmpty(board, start[0] - 2, start[1], 7);
+                    isAvailable = IsEmpty(board, startX - 2, startY, 7);
                     if (isAvailable == true)
                     {
                         if (canMove[3] == true)
                         {
-                            available.Add(new int[] { start[0] - 2, start[1] });
+                            available.Add(new int[] { startX - 2, startY });
                         }
                     }
                 }
-                if (start[0] - 1 >= 0 && start[1] - 1 >= 0)//up left 1
+                if (startX - 1 >= 0 && startY - 1 >= 0)//up left 1
                 {
-                    if (board[start[0] - 1, start[1] - 1].Piece.Color != Color && board[start[0] - 1, start[1] - 1].Piece.Color != ChessColor.NONE)
+                    if (board[startX - 1, startY - 1].Piece.Color != Color && board[startX - 1, startY - 1].Piece.Color != ChessColor.NONE)
                     {
-                        isAvailable = IsAvailable(board, start[0] - 1, start[1] - 1, 4);
+                        isAvailable = IsAvailable(board, startX - 1, startY - 1, 4);
                         if (isAvailable == true)
                         {
                             if (canMove[4] == true)
                             {
-                                available.Add(new int[] { start[0] - 1, start[1] - 1 });
+                                available.Add(new int[] { startX - 1, startY - 1 });
                             }
                         }
                     }
                 }
-                if (start[0] - 1 >= 0 && start[1] + 1 < 8)//up right 1
+                if (startX - 1 >= 0 && startY + 1 < 8)//up right 1
                 {
-                    if (board[start[0] - 1, start[1] + 1].Piece.Color != Color && board[start[0] - 1, start[1] + 1].Piece.Color != ChessColor.NONE)
+                    if (board[startX - 1, startY + 1].Piece.Color != Color && board[startX - 1, startY + 1].Piece.Color != ChessColor.NONE)
                     {
-                        isAvailable = IsAvailable(board, start[0] - 1, start[1] + 1, 5);
+                        isAvailable = IsAvailable(board, startX - 1, startY + 1, 5);
                         if (isAvailable == true)
                         {
                             if (canMove[5] == true)
                             {
-                                available.Add(new int[] { start[0] - 1, start[1] + 1 });
+                                available.Add(new int[] { startX - 1, startY + 1 });
                             }
                         }
                     }

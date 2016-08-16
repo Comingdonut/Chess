@@ -18,120 +18,120 @@ namespace Chess.ChessModels
 
         private void Init()
         {
-            Piece = "Queen";
+            Name = "Queen";
             Symbol = 'Q';
             ResetMovement();
         }
-        public override void MovePiece(ChessSquare[,] board, int[] start, int[] end)
+        public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
-            board[end[0], end[1]].Piece = board[start[0], start[1]].Piece;
-            board[start[0], start[1]].Piece = new Space();
+            board[endX, endY].Piece = board[startX, startY].Piece;
+            board[startX, startY].Piece = new Space();
         }
-        public override bool CheckMovement(ChessSquare[,] board, int[] start, int[] end)
+        public override bool CheckMovement(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             bool isValid = false;
-            List<int[]> available = RestrictMovement(board, start);
+            List<int[]> available = RestrictMovement(board, startX, startY);
             for (int x = 0; x < available.Count; ++x)
             {
-                if (available[x][0] == end[0] && available[x][1] == end[1])
+                if (available[x][0] == endX && available[x][1] == endY)
                 {
                     isValid = true;
                 }
             }
             return isValid;
         }
-        public override List<int[]> RestrictMovement(ChessSquare[,] board, int[] start)
+        public override List<int[]> RestrictMovement(ChessSquare[,] board, int startX, int startY)
         {
             ResetMovement();
             List<int[]> available = new List<int[]>();
             bool isAvailable = false;
             for (int x = 1; x < 8; ++x)
             {
-                if (start[0] + x < 8)//down
+                if (startX + x < 8)//down
                 {
-                    isAvailable = IsAvailable(board, start[0] + x, start[1], 0);
+                    isAvailable = IsAvailable(board, startX + x, startY, 0);
                     if (isAvailable == true)
                     {
                         if (canMove[0] == true)
                         {
-                            available.Add(new int[] { start[0] + x, start[1] });
+                            available.Add(new int[] { startX + x, startY });
                         }
                     }
                 }
-                if (start[0] + x < 8 && start[1] - x >= 0)//down Left
+                if (startX + x < 8 && startY - x >= 0)//down Left
                 {
-                    isAvailable = IsAvailable(board, start[0] + x, start[1] - x, 1);
+                    isAvailable = IsAvailable(board, startX + x, startY - x, 1);
                     if (isAvailable == true)
                     {
                         if (canMove[1] == true)
                         {
-                            available.Add(new int[] { start[0] + x, start[1] - x });
+                            available.Add(new int[] { startX + x, startY - x });
                         }
                     }
                 }
-                if (start[0] + x < 8 && start[1] + x < 8)//down right
+                if (startX + x < 8 && startY + x < 8)//down right
                 {
-                    isAvailable = IsAvailable(board, start[0] + x, start[1] + x, 2);
+                    isAvailable = IsAvailable(board, startX + x, startY + x, 2);
                     if (isAvailable == true)
                     {
                         if (canMove[2] == true)
                         {
-                            available.Add(new int[] { start[0] + x, start[1] + x });
+                            available.Add(new int[] { startX + x, startY + x });
                         }
                     }
                 }
-                if (start[1] + x < 8)//right
+                if (startY + x < 8)//right
                 {
-                    isAvailable = IsAvailable(board, start[0], start[1] + x, 3);
+                    isAvailable = IsAvailable(board, startX, startY + x, 3);
                     if (isAvailable == true)
                     {
                         if (canMove[3] == true)
                         {
-                            available.Add(new int[] { start[0], start[1] + x });
+                            available.Add(new int[] { startX, startY + x });
                         }
                     }
                 }
-                if (start[0] - x >= 0)//up
+                if (startX - x >= 0)//up
                 {
-                    isAvailable = IsAvailable(board, start[0] - x, start[1], 4);
+                    isAvailable = IsAvailable(board, startX - x, startY, 4);
                     if (isAvailable == true)
                     {
                         if (canMove[4] == true)
                         {
-                            available.Add(new int[] { start[0] - x, start[1] });
+                            available.Add(new int[] { startX - x, startY });
                         }
                     }
                 }
-                if (start[0] - x >= 0 && start[1] - x >= 0)//up left
+                if (startX - x >= 0 && startY - x >= 0)//up left
                 {
-                    isAvailable = IsAvailable(board, start[0] - x, start[1] - x, 5);
+                    isAvailable = IsAvailable(board, startX - x, startY - x, 5);
                     if (isAvailable == true)
                     {
                         if (canMove[5] == true)
                         {
-                            available.Add(new int[] { start[0] - x, start[1] - x });
+                            available.Add(new int[] { startX - x, startY - x });
                         }
                     }
                 }
-                if (start[0] - x >= 0 && start[1] + x < 8)//up right
+                if (startX - x >= 0 && startY + x < 8)//up right
                 {
-                    isAvailable = IsAvailable(board, start[0] - x, start[1] + x, 6);
+                    isAvailable = IsAvailable(board, startX - x, startY + x, 6);
                     if (isAvailable == true)
                     {
                         if (canMove[6] == true)
                         {
-                            available.Add(new int[] { start[0] - x, start[1] + x });
+                            available.Add(new int[] { startX - x, startY + x });
                         }
                     }
                 }
-                if (start[1] - x >= 0)//left
+                if (startY - x >= 0)//left
                 {
-                    isAvailable = IsAvailable(board, start[0], start[1] - x, 7);
+                    isAvailable = IsAvailable(board, startX, startY - x, 7);
                     if (isAvailable == true)
                     {
                         if (canMove[7] == true)
                         {
-                            available.Add(new int[] { start[0], start[1] - x });
+                            available.Add(new int[] { startX, startY - x });
                         }
                     }
                 }

@@ -55,6 +55,7 @@
     <Compile Include="ChessModels\ChessPieces\Queen.cs" />
     <Compile Include="ChessModels\ChessPieces\Rook.cs" />
     <Compile Include="ChessModels\ChessPieces\Space.cs" />
+    <Compile Include="ChessModels\Other\Location.cs" />
     <Compile Include="ChessModels\Other\Utility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
