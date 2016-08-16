@@ -68,8 +68,11 @@ namespace Chess.ChessModels
         /// </summary>
         public void PrintBoard()
         {
+            Console.WriteLine("    A  B  C  D  E  F  G  H ");
             for (int x = 0; x < 8; ++x)//Loop for rows of 2-D Arr
             {
+                Console.ResetColor();
+                Console.Write(" " + ((8) - x) + " ");
                 for (int y = 0; y < 8; y++)//Loop for columns of 2-D Arr
                 {
                     ChessSquare square = Squares[x, y];//Grabs a square from the board
@@ -186,7 +189,8 @@ namespace Chess.ChessModels
             List<int[]> Pieces = new List<int[]>();
             int[] lKing = new int[2];//Light king's location.
             int[] dKing = new int[2];//Dark king's location.
-            bool inCheck = false;
+            bool inCheck = true;
+            List<int[]> placeHold3 = new List<int[]>();
             for (int x = 0; x < 8; ++x)
             {
                 for (int y = 0; y < 8; y++)
@@ -194,10 +198,10 @@ namespace Chess.ChessModels
                     Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
                     pieceLoc.X = x;
                     pieceLoc.Y = y;
-                    List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
-                    for (int j = 0; j < placeHold.Count; ++j)
+                    placeHold3 = Squares[x, y].Piece.RestrictMovement(Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
+                    for (int j = 0; j < placeHold3.Count; ++j)
                     {
-                        movements.Add(placeHold[j]);//Adds all possible legal movements from the current piece being looped through.
+                        movements.Add(placeHold3[j]);//Adds all possible legal movements from the current piece being looped through.
                         Pieces.Add(new int[] { pieceLoc.X, pieceLoc.Y });//Contains all piece's that have legal moves.
                     }
                     if (Squares[x, y].Piece.GetType() == typeof(King))
@@ -213,19 +217,48 @@ namespace Chess.ChessModels
                     }
                 }
             }
+            List<int[]> placeHold = new List<int[]>();
+            List<int[]> placeHold2 = new List<int[]>();
             for (int x = 0; x < movements.Count; ++x)//Loops through all possible legal moves.
             {
                 if (movements[x][0] == lKing[0] && movements[x][1] == lKing[1])//If a move is the same as the light king's location.
                 {
-                    for (int y = 0; y < movements.Count; ++y)//Loops through all possible legal moves.
+                    placeHold = Squares[Pieces[x][0], Pieces[x][1]].Piece.Test(Squares, Pieces[x][0], Pieces[x][1], lKing[0], lKing[1]);//returns moves leading to the king's location
+                    for (int v = 0; v < movements.Count; ++v)//Loops through all possible legal moves.
                     {
-                        if (Squares[lKing[0], lKing[1]].Piece.Color == Squares[movements[y][0], movements[y][1]].Piece.Color)
+                        if (Squares[lKing[0], lKing[1]].Piece.Color == Squares[movements[v][0], movements[v][1]].Piece.Color)//if king is the same color as a piece
                         {
-                            List<int[]> placeHold = Squares[Pieces[x][0], Pieces[x][1]].Piece.RestrictMovement(Squares, lKing[0], lKing[1]);//gets piece location
-                            List<int[]> placeHold2 = Squares[movements[y][0], movements[y][1]].Piece.RestrictMovement(Squares, lKing[0], lKing[1]);
-                            if (Pieces[x])
+                            placeHold2 = Squares[movements[x][0], movements[x][1]].Piece.RestrictMovement(Squares, movements[x][0], movements[x][1]);//returns moves that can protect the king
+                        }
+                        for (int y = 0; y < placeHold2.Count; ++y)
+                        {
+                            for (int z = 0; z < placeHold.Count; ++z)
                             {
-
+                                if (placeHold[z] == placeHold2[y])
+                                {
+                                    inCheck = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (movements[x][0] == dKing[0] && movements[x][1] == dKing[1])//If a move is the same as the light king's location.
+                {
+                    placeHold = Squares[Pieces[x][0], Pieces[x][1]].Piece.Test(Squares, Pieces[x][0], Pieces[x][1], dKing[0], dKing[1]);//returns moves leading to the king's location
+                    for (int v = 0; v < movements.Count; ++v)//Loops through all possible legal moves.
+                    {
+                        if (Squares[dKing[0], dKing[1]].Piece.Color == Squares[movements[v][0], movements[v][1]].Piece.Color)
+                        {
+                            placeHold2 = Squares[movements[x][0], movements[x][1]].Piece.RestrictMovement(Squares, movements[x][0], movements[x][1]);//returns moves that can protect the king
+                        }
+                        for (int y = 0; y < placeHold2.Count; ++y)
+                        {
+                            for (int z = 0; z < placeHold.Count; ++z)
+                            {
+                                if (placeHold[z][0] == placeHold2[y][0] && placeHold[z][1] == placeHold2[y][1])
+                                {
+                                    inCheck = false;
+                                }
                             }
                         }
                     }
@@ -247,59 +280,63 @@ namespace Chess.ChessModels
             int[] king = new int[2];//The king(that is in check)'s location.
             if (inCheck == true)//If check has occurred.
             {
-                for (int x = 0; x < 8; ++x)
+                inCheck = canBeSaved();
+                if(inCheck == true)
                 {
-                    for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 8; ++x)
                     {
-                        if (Squares[x, y].Piece.GetType() == typeof(King))//Loops through every piece searching for the king in check.
+                        for (int y = 0; y < 8; y++)
                         {
-                            if ((int)Squares[x, y].Piece.Color == turn)//Makes sure the color of the king is that of the current player's turn.
+                            if (Squares[x, y].Piece.GetType() == typeof(King))//Loops through every piece searching for the king in check.
                             {
-                                king = new int[] { x, y };//Stores the king's location.
+                                if ((int)Squares[x, y].Piece.Color == turn)//Makes sure the color of the king is that of the current player's turn.
+                                {
+                                    king = new int[] { x, y };//Stores the king's location.
+                                }
                             }
                         }
-                    }
-                }//End of the for loop
-                kingsMoves = Squares[king[0], king[1]].Piece.RestrictMovement(Squares, king[0], king[1]);//Stores the kings movements.
-                for (int x = 0; x < 8; ++x)
-                {
-                    for (int y = 0; y < 8; y++)
+                    }//End of the for loop
+                    kingsMoves = Squares[king[0], king[1]].Piece.RestrictMovement(Squares, king[0], king[1]);//Stores the kings movements.
+                    for (int x = 0; x < 8; ++x)
                     {
-                        if ((int)Squares[x, y].Piece.Color != turn)
+                        for (int y = 0; y < 8; y++)
                         {
-                            Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
-                            pieceLoc.X = x;
-                            pieceLoc.Y = y;
-                            List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, pieceLoc.X, pieceLoc.Y );//Gets all possible legal moves for current enemy piece.
-                            for (int j = 0; j < placeHold.Count; ++j)
+                            if ((int)Squares[x, y].Piece.Color != turn)
                             {
-                                enemyMoves.Add(placeHold[j]);//Adds all possible legal movements from the enemy piece being looped through.
+                                Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
+                                pieceLoc.X = x;
+                                pieceLoc.Y = y;
+                                List<int[]> placeHold = Squares[x, y].Piece.RestrictMovement(Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current enemy piece.
+                                for (int j = 0; j < placeHold.Count; ++j)
+                                {
+                                    enemyMoves.Add(placeHold[j]);//Adds all possible legal movements from the enemy piece being looped through.
+                                }
                             }
                         }
-                    }
-                }//End of the for loop
-                bool[] cantMove = new bool[kingsMoves.Count];//Sets a bool array length to the kingsMoves length.
-                for (int j = 0; j < enemyMoves.Count; ++j)
-                {
-                    for (int k = 0; k < kingsMoves.Count; ++k)
+                    }//End of the for loop
+                    bool[] cantMove = new bool[kingsMoves.Count];//Sets a bool array length to the kingsMoves length.
+                    for (int j = 0; j < enemyMoves.Count; ++j)
                     {
-                        if (enemyMoves[j][0] == kingsMoves[k][0] && enemyMoves[j][1] == kingsMoves[k][1])//Checks if any of the kings movements will make the king go back in check
+                        for (int k = 0; k < kingsMoves.Count; ++k)
                         {
-                            cantMove[k] = true;
+                            if (enemyMoves[j][0] == kingsMoves[k][0] && enemyMoves[j][1] == kingsMoves[k][1])//Checks if any of the kings movements will make the king go back in check
+                            {
+                                cantMove[k] = true;
+                            }
                         }
-                    }
-                }//End of the for loop
-                int num = 0;
-                for (int z = 0; z < cantMove.Count(); ++z)
-                {
-                    if (cantMove[z] == true)//checks if all of kings moves will make him captured
+                    }//End of the for loop
+                    int num = 0;
+                    for (int z = 0; z < cantMove.Count(); ++z)
                     {
-                        ++num;
+                        if (cantMove[z] == true)//checks if all of kings moves will make him captured
+                        {
+                            ++num;
+                        }
+                    }//End of the for loop
+                    if (num == cantMove.Length)//If all the kings movements will cause the king to get captures
+                    {
+                        Console.WriteLine("Checkmate!!!");
                     }
-                }//End of the for loop
-                if (num == cantMove.Length)//If all the kings movements will cause the king to get captures
-                {
-                    Console.WriteLine("Checkmate!!!");
                 }
             }
         }

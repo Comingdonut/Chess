@@ -65,5 +65,7 @@ namespace Chess.ChessModels
         /// Resets the bool array, so all moves are possible.
         /// </summary>
         public abstract void ResetMovement();
+        public abstract List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY);
+        public abstract void Test2(List<int[]> available, bool isMoveSet);
     }
 }

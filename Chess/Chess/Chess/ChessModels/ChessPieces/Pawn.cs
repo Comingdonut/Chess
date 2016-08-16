@@ -186,6 +186,89 @@ namespace Chess.ChessModels
         {
             canMove = new bool[] { true, true, true, true, true, true, true, true};
         }
+        public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
+        {
+            bool isMoveSet = false;
+            List<int[]> available = new List<int[]>();
+                if (startX + 1 < 8)//down
+                {
+                    available.Add(new int[] { startX + 1, startY });
+                    if (startX + 1 == endX && startY == endY)
+                    {
+                        isMoveSet = true;
+                    }
+                }
+            Test2(available, isMoveSet);
+            if (isMoveSet == false)
+            {
+                if (startX + 1 < 8 && startY - 1 >= 0)//down Left
+                {
+                    available.Add(new int[] { startX + 1, startY - 1 });
+                    if (startX + 1 == endX && startY - 1 == endY)
+                    {
+                        isMoveSet = true;
+                    }
+                }
+                Test2(available, isMoveSet);
+            }
+            if (isMoveSet == false)
+            {
+                if (startX + 1 < 8 && startY + 1 < 8)//down right
+                {
+                    available.Add(new int[] { startX + 1, startY + 1 });
+                    if (startX + 1 == endX && startY + 1 == endY)
+                    {
+                        isMoveSet = true;
+                    }
+                }
+                Test2(available, isMoveSet);
+            }
+            if (isMoveSet == false)
+            {
+                    if (startX - 1 >= 0)//up
+                    {
+                        available.Add(new int[] { startX - 1, startY });
+                        if (startX - 1 == endX && startY == endY)
+                        {
+                            isMoveSet = true;
+                        }
+                    }
+                Test2(available, isMoveSet);
+            }
+            if (isMoveSet == false)
+            {
+                    if (startX - 1 >= 0 && startY - 1 >= 0)//up left
+                    {
+                        available.Add(new int[] { startX - 1, startY - 1 });
+                        if (startX - 1 == endX && startY - 1 == endY)
+                        {
+                            isMoveSet = true;
+                        }
+                    }
+                Test2(available, isMoveSet);
+            }
+            if (isMoveSet == false)
+            {
+                    if (startX - 1 >= 0 && startY + 1 < 8)//up right
+                    {
+                        available.Add(new int[] { startX - 1, startY + 1 });
+                        if (startX - 1 == endX && startY + 1 == endY)
+                        {
+                            isMoveSet = true;
+                        }
+                    }
+                Test2(available, isMoveSet);
+            }
+            return available;
+        }
+
+        public override void Test2(List<int[]> available, bool isMoveSet)
+        {
+            if (isMoveSet == false)
+            {
+                available.Clear();
+            }
+        }
         /****************************/
     }
 }
