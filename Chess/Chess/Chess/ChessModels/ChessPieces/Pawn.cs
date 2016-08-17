@@ -190,14 +190,14 @@ namespace Chess.ChessModels
         {
             bool isMoveSet = false;
             List<int[]> available = new List<int[]>();
-                if (startX + 1 < 8)//down
+            if (startX + 1 < 8)//down
+            {
+                available.Add(new int[] { startX + 1, startY });
+                if (startX + 1 == endX && startY == endY)
                 {
-                    available.Add(new int[] { startX + 1, startY });
-                    if (startX + 1 == endX && startY == endY)
-                    {
-                        isMoveSet = true;
-                    }
+                    isMoveSet = true;
                 }
+            }
             Test2(available, isMoveSet);
             if (isMoveSet == false)
             {

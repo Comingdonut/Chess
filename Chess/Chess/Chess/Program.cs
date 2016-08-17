@@ -3,7 +3,7 @@ using System;
 
 namespace Chess
 {
-    class Program
+    public class Program
     {
         #region Variables
         private Commands read;
@@ -14,16 +14,11 @@ namespace Chess
             read = new Commands();
         }
         /// <summary>
-        /// Reads all lines from a file.
+        /// Reads the game.
         /// </summary>
         public void Run()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"ChessCommands.txt");
-            
-            foreach (string line in lines)
-            {
-                read.ReadLine(line);
-            }
+            read.Game();
         }
         static void Main(string[] args)
         {

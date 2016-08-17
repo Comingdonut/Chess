@@ -9,8 +9,10 @@ namespace Chess.ChessModels
 {
     public class ChessBoard
     {
+        #region Variables
         //A 2-D Array of squares essentially creating a board.
         public ChessSquare[,] Squares { get; set; }
+        #endregion
         public ChessBoard()
         {
             CreateSquares();
@@ -68,7 +70,6 @@ namespace Chess.ChessModels
         /// </summary>
         public void PrintBoard()
         {
-            Console.WriteLine("    A  B  C  D  E  F  G  H ");
             for (int x = 0; x < 8; ++x)//Loop for rows of 2-D Arr
             {
                 Console.ResetColor();
@@ -97,26 +98,27 @@ namespace Chess.ChessModels
                 Console.WriteLine();
             }
             Console.ResetColor();
+            Console.WriteLine("    A  B  C  D  E  F  G  H ");
         }
         #endregion
 
         #region Checks
         /// <summary>
-        /// Grabs all available legal moves from every piece and checks if a avialable legal move from that piece can kill a king.
+        /// Grabs all available legal moves from every piece and checks if an
+        /// available legal move from that piece can kill the opposite colored  king.
         /// Prints out the kings status.
         /// </summary>
         ///<returns>
         ///True: If a piece can move to kill a king.
         ///False: If no move can capture a king.
         /// </returns>
-        public bool IsInCheck()
+        public bool IsInCheck(int turn)
         {
             List<int[]> enemyMovements = new List<int[]>();//A storage for all possible legal move for the pieces.
             List<int[]> Pieces = new List<int[]>();
             int[] lKing = new int[2];//Light king's location.
             int[] dKing = new int[2];//Dark king's location.
             bool inCheck = false;
-            string status = "";//The status of the king.
             for (int x = 0; x < 8; ++x)
             {
                 for (int y = 0; y < 8; y++)
@@ -148,42 +150,31 @@ namespace Chess.ChessModels
                 string[] word = GrabPiece(enemyMovements[x][0], enemyMovements[x][1]);//Word is equal to a move.
                 if (enemyMovements[x][0] == lKing[0] && enemyMovements[x][1] == lKing[1])//If a move is the same as the light king's location.
                 {
-                    Console.WriteLine("Light King's Status: In danger\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
+                    Console.WriteLine("Light King's Status: In danger!!!\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
                                 Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Name,
                                 word[0], word[1],
                                 Squares[lKing[0], lKing[1]].Piece.Color.ToString(), Squares[lKing[0], lKing[1]].Piece.Name);
-                    status = " ";
                     inCheck = true;
                 }
                 else if (enemyMovements[x][0] == dKing[0] && enemyMovements[x][1] == dKing[1])//If a move is the same as the dark king's location.
                 {
-                    Console.WriteLine("Dark King's Status: In danger\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
+                    Console.WriteLine("Dark King's Status: In danger!!!\n{0} {1}'s movement to {2}{3}, will capture {4} {5}.",
                                 Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Name,
                                 word[0], word[1],
                                 Squares[dKing[0], dKing[1]].Piece.Color.ToString(), Squares[dKing[0], dKing[1]].Piece.Name);
-                    status = " ";
                     inCheck = true;
                 }
-                else//If status is a space the print out that the king is safe.
-                {
-                    if(status != " ")
-                    {
-                        status = "King's Status: Safe.";
-                    }
-                }
-                //else
-                //{
-                //Console.WriteLine("{0} {1}'s movement: {2}{3}",
-                //            Squares[Pieces[x][0], Pieces[x][1]].Piece.Color.ToString(), Squares[Pieces[x][0], Pieces[x][1]].Piece.Piece, word[0], word[1]);
-                //}
-            }
-            if (status != " ")//If status is not a space the print out status
-            {
-                Console.WriteLine(status);
             }
             return inCheck;
         }
-        public bool canBeSaved()
+        /// <summary>
+        /// Checks if a piece can save the the same colored king from checkmate.
+        /// </summary>
+        /// <returns>
+        /// True: If no piece can take the king out of check.
+        /// False: If the king can be taken out of check.
+        /// </returns>
+        public bool CanBeSaved()
         {
             List<int[]> movements = new List<int[]>();//A storage for all possible legal move for the pieces.
             List<int[]> Pieces = new List<int[]>();
@@ -269,18 +260,19 @@ namespace Chess.ChessModels
         /// <summary>
         /// Checks if a player is in check.
         /// If they are, then it determines if the king has no way to get out of check.
-        /// Prints out check mate if the king is surrounded.
+        /// Prints out checkmate if the king can not get out of check.
         /// </summary>
         /// <param name="turn">An int representing a player's turn.</param>
-        public void IsInCheckMate(int turn)
+        public bool IsInCheckMate(int turn)
         {
             List<int[]> kingsMoves = new List<int[]>();
             List<int[]> enemyMoves = new List<int[]>();
-            bool inCheck = IsInCheck();
+            bool inCheck = IsInCheck(turn);
+            bool checkmate = false;
             int[] king = new int[2];//The king(that is in check)'s location.
             if (inCheck == true)//If check has occurred.
             {
-                inCheck = canBeSaved();
+                inCheck = CanBeSaved();
                 if(inCheck == true)
                 {
                     for (int x = 0; x < 8; ++x)
@@ -336,9 +328,11 @@ namespace Chess.ChessModels
                     if (num == cantMove.Length)//If all the kings movements will cause the king to get captures
                     {
                         Console.WriteLine("Checkmate!!!");
+                        checkmate = true;
                     }
                 }
             }
+            return checkmate;
         }
         /// <summary>
         /// Reads in a column int and row int to convert and store it to an Array.
@@ -385,7 +379,7 @@ namespace Chess.ChessModels
                     x = "a";
                     break;
                 case 1:
-                    x = "d";
+                    x = "b";
                     break;
                 case 2:
                     x = "c";

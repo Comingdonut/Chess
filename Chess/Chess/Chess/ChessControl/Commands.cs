@@ -6,51 +6,83 @@ namespace Chess.ChessControl
     public class Commands
     {
         #region Variables
-        private Utility util;
+        private Controller _con;
         #endregion
         public Commands()
         {
-            util = new Utility();
+            _con = new Controller();
+        }
+        #region Game
+        /// <summary>
+        /// Starts the game by placing all the pieces.
+        /// It then prints out all movable pieces for the current player.
+        /// When the player chooses a piece, it then prints out all locations the piece can move to.
+        /// The player then chooses where the piece should go.
+        /// As long as it's a legal move, the piece will move to the desired location.
+        /// </summary>
+        public void Game()
+        {
+            string[] lines = System.IO.File.ReadAllLines(@"ChessCommands.txt");
+
+            foreach (string line in lines)
+            {
+                ReadMove(line);
+            }
+            while (_con.HasWon == false)
+            {
+                _con.PrintMovablePieces(_con.Turn);
+                string input = Console.ReadLine();
+                ReadPiece(input);
+                Console.WriteLine("------");
+                input = Console.ReadLine();
+                ReadMove(input);
+            }
+        }
+        #endregion
+
+        #region Read Commands
+        /// <summary>
+        /// Reads in a string that represents a piece.
+        /// </summary>
+        /// <param name="piece">A string that represents a piece.</param>
+        public void ReadPiece(string piece)
+        {
+            if (piece.Length == _con.Piece_Length)
+            {
+                _con.ProcessPiece(piece, @"([a-h])([1-8])");
+            }
         }
         /// <summary>
-        /// Reads in lines from a file and checks for commands.
+        /// Reads in commands from the user.
         /// </summary>
-        /// <param name="line">A line from a file.</param>
-        public void ReadLine(string line)
+        /// <param name="move">A command from the user.</param>
+        public void ReadMove(string move)
         {
-            if (line.Length == util.Place_Piece)
+            if (move.Length == _con.Place_Piece)
             {
-                util.ProcessLine(line, @"([KQBNRP])([ld])([a-h])([1-8])");
+                _con.ProcessMove(move, @"([KQBNRP])([ld])([a-h])([1-8])");
             }
-            else if (line.Length == util.Move_Piece)
+            else if (move.Length == _con.Piece_Length)
             {
-                Print();
-                util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])");
+                _con.ProcessMove(move, @"([a-h])([1-8])");
+                _con.Print();
             }
-            else if (line.Length == util.Capture_Piece)
+            else if (move.Length == _con.Capture_Piece)
             {
-                Print();
-                util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])");
+                _con.ProcessMove(move, @"([a-h])([1-8])([ ])([a-h])([1-8])([*])");
+                _con.Print();
             }
-            else if (line.Length == util.King_Side_Piece)
+            else if (move.Length == _con.King_Side_Piece)
             {
-                Print();
-                util.ProcessLine(line, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])");
+                _con.ProcessMove(move, @"([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])([ ])([a-h])([1-8])");
+                _con.Print();
             }
             else
             {
                 Console.WriteLine("Invalid command...");
             }
         }
-        /// <summary>
-        /// Prints out who's turn it is, a line used to make the console readable and the king's status.
-        /// </summary>
-        public void Print()
-        {
-            Console.WriteLine("<--------------------------------------------------->");
-            Console.WriteLine("It's Player " + util.Turn + "'s turn!");
-            util.Board.IsInCheckMate(util.Turn);
-        }
+        #endregion
         //-----------------------------------------------------------------------------------
     }
 }
