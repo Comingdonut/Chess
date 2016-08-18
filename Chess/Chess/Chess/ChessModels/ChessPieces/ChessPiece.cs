@@ -18,10 +18,14 @@ namespace Chess.ChessModels
         /// </summary>
         public ChessColor Color { get; set; }
         /// <summary>
-        /// A bool array that has value turn true if a specific move for the piece is possible.
+        /// A bool array that has the value turn true if a specific move for the piece is possible.
         /// The length of the array is set to the amount of all possible move directions for the piece.
         /// </summary>
         public bool[] canMove { get; set; }
+        /// <summary>
+        /// A int array that keeps track the amount of times a movement goes over the enemy piece.
+        /// </summary>
+        public int[] collision;
         #endregion
         public ChessPiece()
         {

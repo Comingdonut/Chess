@@ -58,6 +58,10 @@ namespace Chess.ChessModels
                         }
                     }
                 }
+            }
+            collision = new int[8];
+            for (int x = 1; x < 8; ++x)
+            {
                 if (startY + x < 8)//right
                 {
                     isAvailable = IsAvailable(board, startX, startY + x, 1);
@@ -69,6 +73,10 @@ namespace Chess.ChessModels
                         }
                     }
                 }
+            }
+            collision = new int[8];
+            for (int x = 1; x < 8; ++x)
+            {
                 if (startX - x >= 0)//up
                 {
                     isAvailable = IsAvailable(board, startX - x, startY, 2);
@@ -80,6 +88,10 @@ namespace Chess.ChessModels
                         }
                     }
                 }
+            }
+            collision = new int[8];
+            for (int x = 1; x < 8; ++x)
+            {
                 if (startY - x >= 0)//left
                 {
                     isAvailable = IsAvailable(board, startX, startY - x, 3);
@@ -97,9 +109,28 @@ namespace Chess.ChessModels
         public override bool IsAvailable(ChessSquare[,] board, int row, int column, int index)
         {
             bool canMove = true;
-            if (board[row, column].Piece.Color == Color && board[row, column].Piece.Color != ChessColor.NONE)
+            if (board[row, column].Piece.Color == Color)
             {
                 canMove = false;
+            }
+            else if (board[row, column].Piece.Color != ChessColor.NONE)
+            {
+                if (collision[index] >= 1)
+                {
+                    canMove = false;
+                }
+                collision[index]++;
+            }
+            else
+            {
+                for (int x = 0; x < 8; ++x)
+                {
+                    if (collision[x] > 0)
+                    {
+                        canMove = false;
+                        break;
+                    }
+                }
             }
             if (this.canMove[index] == true)
             {
@@ -110,6 +141,7 @@ namespace Chess.ChessModels
         public override void ResetMovement()
         {
             canMove = new bool[] { true, true, true, true };
+            collision = new int[8];
         }
         public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
