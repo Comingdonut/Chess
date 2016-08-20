@@ -1,0 +1,21 @@
+﻿<Window x:Class="ChessGui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChessGui"
+        mc:Ignorable="d"
+        Title="Chess" Height="525" Width="725">
+    <StackPanel Background="LightYellow">
+        <Label x:Name="PlayerTurn"
+               Height="25"
+               Width="85"/>
+        <UniformGrid x:Name="Board"
+                     Margin="0, 45, 10, 45"
+                     Width="400"
+                     Height="400"
+                     Rows="8"
+                     Columns="8">
+        </UniformGrid>
+    </StackPanel>
+</Window>
