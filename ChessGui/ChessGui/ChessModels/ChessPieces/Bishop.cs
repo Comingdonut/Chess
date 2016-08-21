@@ -5,11 +5,6 @@ namespace Chess.ChessModels
 {
     public class Bishop : ChessPiece
     {
-        public Bishop()
-        {
-            Init();
-        }
-
         public Bishop(ChessColor color)
         {
             Color = color;
@@ -142,11 +137,11 @@ namespace Chess.ChessModels
             canMove = new bool[] { true, true, true, true};
             collision = new int[8];
         }
-        public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
+        public override List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             bool isMoveSet = false;
             List<int[]> available = new List<int[]>();
-            Test2(available, isMoveSet);
+            ResetSearch(available, isMoveSet);
             for (int x = 1; x < 8; ++x)
             {
                 if (startX + x < 8 && startY - x >= 0)//down Left
@@ -159,7 +154,7 @@ namespace Chess.ChessModels
                     }
                 }
             }
-            Test2(available, isMoveSet);
+            ResetSearch(available, isMoveSet);
             if (isMoveSet == false)
             {
                 for (int x = 1; x < 8; ++x)
@@ -174,7 +169,7 @@ namespace Chess.ChessModels
                         }
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -190,7 +185,7 @@ namespace Chess.ChessModels
                         }
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -206,12 +201,12 @@ namespace Chess.ChessModels
                         }
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             return available;
         }
 
-        public override void Test2(List<int[]> available, bool isMoveSet)
+        public override void ResetSearch(List<int[]> available, bool isMoveSet)
         {
             if (isMoveSet == false)
             {

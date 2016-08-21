@@ -63,7 +63,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ChessControl\Commands.cs" />
     <Compile Include="ChessControl\Controller.cs" />
     <Compile Include="ChessControl\Location.cs" />
     <Compile Include="ChessView\Square.cs" />

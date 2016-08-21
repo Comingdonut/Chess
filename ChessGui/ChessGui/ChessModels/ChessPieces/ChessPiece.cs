@@ -23,10 +23,6 @@ namespace Chess.ChessModels
         /// </summary>
         public int[] collision;
         #endregion
-        public ChessPiece()
-        {
-
-        }
         #region PieceMovement
         /// <summary>
         /// Moves a piece from a starting location to a desired location.
@@ -66,8 +62,8 @@ namespace Chess.ChessModels
         /// Resets the bool array, so all moves are possible.
         /// </summary>
         public abstract void ResetMovement();
-        public abstract List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY);
-        public abstract void Test2(List<int[]> available, bool isMoveSet);
+        public abstract List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY);
+        public abstract void ResetSearch(List<int[]> available, bool isMoveSet);
         #endregion
     }
 }

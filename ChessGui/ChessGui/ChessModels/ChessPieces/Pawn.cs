@@ -6,10 +6,8 @@ namespace Chess.ChessModels
     public class Pawn : ChessPiece
     {
         private int _moves;
-        public Pawn()
-        {
-            Init();
-        }
+        private int _moveAmount;
+        public bool chance = false;
 
         public Pawn(ChessColor color)
         {
@@ -22,6 +20,7 @@ namespace Chess.ChessModels
             Symbol = 'P';
             ResetMovement();
             _moves = 0;
+            _moveAmount = 0;
         }
         public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
@@ -38,7 +37,16 @@ namespace Chess.ChessModels
                 if (available[x][0] == endX && available[x][1] == endY)
                 {
                     isValid = true;
-                    ++_moves;
+                    _moveAmount++;
+                    _moves = startX - endX;
+                    if (Color == ChessColor.DARK)
+                    {
+                        _moves = endX - startX;
+                    }
+                    if (_moves == 2)
+                    {
+                        chance = true;
+                    }
                 }
             }
             return isValid;
@@ -84,6 +92,17 @@ namespace Chess.ChessModels
                             }
                         }
                     }
+                    else
+                    {
+                        isAvailable = CheckEnPassant(board, startX, startY - 1, 1);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[4] == true)
+                            {
+                                available.Add(new int[] { startX + 1, startY - 1 });
+                            }
+                        }
+                    }
                 }
                 if (startX + 1 < 8 && startY + 1 < 8)//down right 1
                 {
@@ -93,6 +112,17 @@ namespace Chess.ChessModels
                         if (isAvailable == true)
                         {
                             if (canMove[2] == true)
+                            {
+                                available.Add(new int[] { startX + 1, startY + 1 });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isAvailable = CheckEnPassant(board, startX, startY + 1, 2);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[4] == true)
                             {
                                 available.Add(new int[] { startX + 1, startY + 1 });
                             }
@@ -137,6 +167,17 @@ namespace Chess.ChessModels
                             }
                         }
                     }
+                    else
+                    {
+                        isAvailable = CheckEnPassant(board, startX, startY - 1, 4);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[4] == true)
+                            {
+                                available.Add(new int[] { startX - 1, startY - 1 });
+                            }
+                        }
+                    }
                 }
                 if (startX - 1 >= 0 && startY + 1 < 8)//up right 1
                 {
@@ -146,6 +187,17 @@ namespace Chess.ChessModels
                         if (isAvailable == true)
                         {
                             if (canMove[5] == true)
+                            {
+                                available.Add(new int[] { startX - 1, startY + 1 });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isAvailable = CheckEnPassant(board, startX, startY + 1, 5);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[4] == true)
                             {
                                 available.Add(new int[] { startX - 1, startY + 1 });
                             }
@@ -181,11 +233,37 @@ namespace Chess.ChessModels
             }
             return canMove;
         }
+        private bool CheckEnPassant(ChessSquare[,] board, int row, int column, int index)
+        {
+            bool canMove = false;
+            
+            if (board[row, column].Piece.GetType() == typeof(Pawn))
+            {
+                if (board[row, column].Piece.Color != Color && board[row, column].Piece.Color != ChessColor.NONE)
+                {
+                    if (((Pawn)board[row, column].Piece)._moveAmount == 1)
+                    {
+                        if (((Pawn)board[row, column].Piece)._moves == 2)
+                        {
+                            if(((Pawn)board[row, column].Piece).chance == true)
+                            {
+                                canMove = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (this.canMove[index] == false)
+            {
+                this.canMove[index] = canMove;
+            }
+            return canMove;
+        }
         public override void ResetMovement()
         {
             canMove = new bool[] { true, true, true, true, true, true, true, true};
         }
-        public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
+        public override List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             bool isMoveSet = false;
             List<int[]> available = new List<int[]>();
@@ -197,7 +275,7 @@ namespace Chess.ChessModels
                     isMoveSet = true;
                 }
             }
-            Test2(available, isMoveSet);
+            ResetSearch(available, isMoveSet);
             if (isMoveSet == false)
             {
                 if (startX + 1 < 8 && startY - 1 >= 0)//down Left
@@ -208,7 +286,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -220,7 +298,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -232,7 +310,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -244,7 +322,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -256,12 +334,12 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             return available;
         }
 
-        public override void Test2(List<int[]> available, bool isMoveSet)
+        public override void ResetSearch(List<int[]> available, bool isMoveSet)
         {
             if (isMoveSet == false)
             {

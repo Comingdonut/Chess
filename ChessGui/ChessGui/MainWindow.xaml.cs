@@ -22,12 +22,12 @@ namespace ChessGui
     public partial class MainWindow : Window
     {
         private Controller _con;
-        public string print = "Hello world";
         public MainWindow()
         {
             _con = new Controller();
             InitializeComponent();
-            _con.CreateBoard(Board);
+            _con.CreateBoard(Board, Movement);
+            _con.SetButtons(Promote);
         }
     }
 }

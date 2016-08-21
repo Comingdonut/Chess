@@ -9,11 +9,11 @@ namespace Chess.ChessModels
 {
     public class ChessSquare
     {
-        public ChessSquare(int y, int x, ChessColor color)
+        public ChessSquare(int x, int y, ChessColor color)
         {
             Loc = new Location();
-            Loc.Y = y;
             Loc.X = x;
+            Loc.Y = y;
             Color = color;
         }
         /// <summary>

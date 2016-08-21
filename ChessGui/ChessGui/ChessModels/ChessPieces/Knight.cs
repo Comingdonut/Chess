@@ -5,11 +5,6 @@ namespace Chess.ChessModels
 {
     public class Knight : ChessPiece
     {
-        public Knight()
-        {
-            Init();
-        }
-
         public Knight(ChessColor color)
         {
             Color = color;
@@ -127,7 +122,7 @@ namespace Chess.ChessModels
         {
             canMove = new bool[] { true, true, true, true, true, true, true, true };
         }
-        public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
+        public override List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             bool isMoveSet = false;
             List<int[]> available = new List<int[]>();
@@ -139,7 +134,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-            Test2(available, isMoveSet);
+            ResetSearch(available, isMoveSet);
             if (isMoveSet == false)
             {
                 if (startX - 2 >= 0 && startY + 1 < 8)//up 2 right 1
@@ -150,7 +145,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -162,7 +157,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -174,7 +169,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -186,7 +181,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -198,7 +193,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -210,7 +205,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -222,12 +217,12 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             return available;
         }
 
-        public override void Test2(List<int[]> available, bool isMoveSet)
+        public override void ResetSearch(List<int[]> available, bool isMoveSet)
         {
             if (isMoveSet == false)
             {

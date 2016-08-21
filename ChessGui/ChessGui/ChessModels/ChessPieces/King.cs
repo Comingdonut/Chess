@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Chess.ChessModels
 {
     public class King : ChessPiece
     {
-        public King()
-        {
-            Init();
-        }
+        public int moveAmount;
 
         public King(ChessColor color)
         {
@@ -35,6 +33,7 @@ namespace Chess.ChessModels
                 if (available[x][0] == endX && available[x][1] == endY)
                 {
                     isValid = true;
+                    moveAmount++;
                 }
             }
             return isValid;
@@ -44,6 +43,8 @@ namespace Chess.ChessModels
             ResetMovement();
             List<int[]> available = new List<int[]>();
             bool isAvailable = false;
+            bool isCastleing = false;
+            bool isLeft = false;
             if (startX + 1 < 8)//down 1
             {
                 isAvailable = IsAvailable(board, startX + 1, startY, 0);
@@ -86,6 +87,11 @@ namespace Chess.ChessModels
                     {
                         available.Add(new int[] { startX, startY + 1 });
                     }
+                }
+                isCastleing = IsPossibleToCastleing(board, startX, isLeft);
+                if (isCastleing == true)
+                {
+                    available.Add(new int[] { startX, startY + 2 });
                 }
             }
             if (startX - 1 >= 0)//up 1
@@ -131,6 +137,12 @@ namespace Chess.ChessModels
                         available.Add(new int[] { startX, startY - 1 });
                     }
                 }
+                isLeft = true;
+                isCastleing = IsPossibleToCastleing(board, startX, isLeft);
+                if (isCastleing == true)
+                {
+                    available.Add(new int[] { startX, startY - 2 });
+                }
             }
             return available;
         }
@@ -147,11 +159,159 @@ namespace Chess.ChessModels
             }
             return canMove;
         }
+        public bool IsPossibleToCastleing(ChessSquare[,] board, int x, bool isLeft)
+        {
+            bool isPossible = false;
+            bool leftCastle = false;
+            bool rightCastle = false;
+            int caslteLeft = 0;
+            int caslteRight = 0;
+            for (int y = 0; y < 4; ++y)
+            {
+                if(4 - y >= 0)
+                {
+                    if (board[x, 4 - y].Piece.Color == ChessColor.NONE)
+                    {
+                        caslteLeft++;
+                    }
+                }
+                if (4 + y < 8)
+                {
+                    if (y != 3)
+                    {
+                        if (board[x, 4 + y].Piece.Color == ChessColor.NONE)
+                        {
+                            caslteRight++;
+                        }
+                    }
+                }
+            }
+            if(isLeft == true)
+            {
+                if (caslteLeft == 3)
+                {
+                    leftCastle = CastleingLeftPosition(board, x);
+                    if (leftCastle == true)
+                    {
+                        isPossible = true;
+                    }
+                }
+            }
+            else
+            {
+                if (caslteRight == 2)
+                {
+                    rightCastle = CastleingRightPosition(board, x);
+                    if (rightCastle == true)
+                    {
+                        isPossible = true;
+                    }
+                }
+            }
+            return isPossible;
+        }
+        public bool CastleingLeftPosition(ChessSquare[,] board, int x)
+        {
+            bool inPosition = false;
+            int position = 0;
+            if (board[x, 4].Piece.GetType() == typeof(King))
+            {
+                if (((King)board[x, 4].Piece).moveAmount == 0)
+                {
+                    position++;
+                }
+            }
+            if (board[x, 0].Piece.GetType() == typeof(Rook))
+            {
+                if (((Rook)board[x, 0].Piece).moveAmount == 0)
+                {
+                    position++;
+                }
+            }
+            if (position == 2)
+            {
+                inPosition = true;
+            }
+            return inPosition;
+        }
+        public bool CastleingRightPosition(ChessSquare[,] board, int x)
+        {
+            bool inPosition = false;
+            int position = 0;
+            if (board[x, 4].Piece.GetType() == typeof(King))
+            {
+                if (((King)board[x, 4].Piece).moveAmount == 0)
+                {
+                    position++;
+                }
+            }
+            if (board[x, 7].Piece.GetType() == typeof(Rook))
+            {
+                if (((Rook)board[x, 7].Piece).moveAmount == 0)
+                {
+                    position++;
+                }
+            }
+            if (position == 2)
+            {
+                inPosition = true;
+            }
+            return inPosition;
+        }
+        //public List<int[]> AvoidCheck(ChessSquare[,] board, int startX, int startY)
+        //{
+        //    List<int[]> kingsMoves = new List<int[]>();
+        //    List<int[]> enemyMoves = new List<int[]>();
+        //    bool isDangerous = false;
+        //    kingsMoves = board[startX, startY].Piece.RestrictMovement(board, startX, startY);//Stores the kings movements.
+        //    for (int x = 0; x < 8; ++x)
+        //    {
+        //        for (int y = 0; y < 8; y++)
+        //        {
+        //            if (board[x, y].Piece.Color != Color && board[x, y].Piece.Color != ChessColor.NONE)
+        //            {
+        //                //Gets all possible legal moves for current enemy piece.
+        //                int[] placeHold = new int[] {x, y };
+        //                enemyMoves.Add(placeHold);//Adds all enemy pieces.
+        //            }
+        //        }
+        //    }//End of the for loop
+        //    for (int j = 0; j < enemyMoves.Count; ++j)
+        //    {
+        //        for (int k = 0; k < kingsMoves.Count; ++k)
+        //        {
+        //            //Checks if any of the kings movements will make the king go back in check
+        //            if(board[enemyMoves[j][0], enemyMoves[j][1]].Piece.GetType() != typeof(King))
+        //            {
+        //                isDangerous = board[enemyMoves[j][0], enemyMoves[j][1]].Piece.CheckMovement(board, enemyMoves[j][0], enemyMoves[j][1], kingsMoves[k][0], kingsMoves[k][1]);
+        //            }
+        //            else
+        //            {
+        //                List<int[]> hold = board[enemyMoves[j][0], enemyMoves[j][1]].Piece.RestrictMovement(board, enemyMoves[j][0], enemyMoves[j][1]);
+        //                for(int l = 0; l < hold.Count; ++l)
+        //                {
+        //                    for (int m = 0; m < kingsMoves.Count; ++m)
+        //                    {
+        //                        if (kingsMoves[m][0] == hold[l][0] && kingsMoves[m][1] == hold[l][1])
+        //                        {
+        //                            isDangerous = true;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            if (isDangerous == true)
+        //            {
+        //                kingsMoves.RemoveAt(k);
+        //            }
+        //        }
+        //    }//End of the for loop
+        //    return kingsMoves;
+        //}
         public override void ResetMovement()
         {
             canMove = new bool[] { true, true, true, true, true, true, true, true };
         }
-        public override List<int[]> Test(ChessSquare[,] board, int startX, int startY, int endX, int endY)
+        public override List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
             bool isMoveSet = false;
             List<int[]> available = new List<int[]>();
@@ -163,7 +323,7 @@ namespace Chess.ChessModels
                         isMoveSet = true;
                     }
                 }
-            Test2(available, isMoveSet);
+            ResetSearch(available, isMoveSet);
             if (isMoveSet == false)
             {
                     if (startX + 1 < 8 && startY - 1 >= 0)//down Left
@@ -174,7 +334,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -186,7 +346,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -198,7 +358,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -210,7 +370,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -222,7 +382,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -234,7 +394,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -246,7 +406,7 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             if (isMoveSet == false)
             {
@@ -258,12 +418,12 @@ namespace Chess.ChessModels
                             isMoveSet = true;
                         }
                     }
-                Test2(available, isMoveSet);
+                ResetSearch(available, isMoveSet);
             }
             return available;
         }
 
-        public override void Test2(List<int[]> available, bool isMoveSet)
+        public override void ResetSearch(List<int[]> available, bool isMoveSet)
         {
             if (isMoveSet == false)
             {
