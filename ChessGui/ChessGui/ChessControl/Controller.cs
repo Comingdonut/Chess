@@ -33,6 +33,7 @@ namespace Chess.ChessControl
         private UniformGrid g;
         private UniformGrid g2;
         private Label l;
+        private Label l2;
         private Square _sq;
         private ChessPiece newPiece;
         private ChessColor pawnColor;
@@ -291,10 +292,12 @@ namespace Chess.ChessControl
         {
             if(Turn == 1)
             {
+                l2.Content = "Dark Player's turn.";
                 Turn = 2;
             }
             else
             {
+                l2.Content = "Light Player's turn.";
                 Turn = 1;
             }
         }
@@ -703,10 +706,11 @@ namespace Chess.ChessControl
         }
         #endregion
 
-        public void CreateBoard(UniformGrid grid, Label label)
+        public void CreateBoard(UniformGrid grid, Label label, Label label2)
         {
             g = grid;
             l = label;
+            l2 = label2;
             for (int x = 0; x < 8; ++x)
             {
                 for (int y = 0; y < 8; ++y)
@@ -833,7 +837,7 @@ namespace Chess.ChessControl
         {
             _board = new ChessBoard();
             g.Children.Clear();
-            CreateBoard(g, l);
+            CreateBoard(g, l, l2);
             _startLoc = new Location();
             _endLoc = new Location();
             ChangeTurn();

@@ -26,7 +26,7 @@ namespace ChessGui
         {
             _con = new Controller();
             InitializeComponent();
-            _con.CreateBoard(Board, Movement);
+            _con.CreateBoard(Board, Movement, PlayerTurns);
             _con.SetButtons(Promote);
         }
     }

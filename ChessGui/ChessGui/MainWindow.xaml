@@ -7,11 +7,26 @@
         mc:Ignorable="d"
         Title="Chess" Height="525" Width="725">
     <StackPanel Background="LightYellow">
-        <Label x:Name="Movement"
-               Height="25"
-               Width="200"
-               Margin="10, 10, 10, 10"
-               VerticalAlignment="Top"/>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="65*"/>
+                <ColumnDefinition Width="35*"/>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="PlayerTurns"
+                   Height="25"
+                   Width="110"
+                   Margin="10, 10, 10, 10"
+                   VerticalAlignment="Top"
+                   Grid.Column="0"
+                   Content="Light Player's turn."/>
+            <Label x:Name="Movement"
+                   Height="25"
+                   Width="200"
+                   Margin="10, 10, 10, 10"
+                   VerticalAlignment="Top"
+                   Grid.Column="1"/>
+        </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="65*"/>
