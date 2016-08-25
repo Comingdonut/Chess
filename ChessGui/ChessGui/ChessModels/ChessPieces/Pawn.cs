@@ -24,7 +24,6 @@ namespace Chess.ChessModels
         }
         public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
-            _moveAmount++;
             board[endX, endY].Piece = board[startX, startY].Piece;
             board[startX, startY].Piece = new Space();
         }
