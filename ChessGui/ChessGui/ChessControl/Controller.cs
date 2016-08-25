@@ -7,10 +7,8 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Chess.ChessControl
 {
@@ -30,15 +28,24 @@ namespace Chess.ChessControl
         private int _turn;
         //A string that represents a selected piece for the user.
         private string _startSquare;
+        //Grid that represents the board.
         private UniformGrid g;
+        //Grid that represents the promote spot.
         private UniformGrid g2;
+        //Label that represents the movement of each peice
         private Label l;
+        //Label that represents the turn of the current player.
         private Label l2;
-        private Square _sq;
+        //A square on the board that was selected.
+        private Square _selectedSquare;
+        //
         private ChessPiece newPiece;
         private ChessColor pawnColor;
         private int _promotion;
         private int[] square;
+        //If king is in check.
+        private bool inCheck;
+        List<int[]> a = new List<int[]>();
         #endregion
         public Controller()
         {
@@ -46,7 +53,7 @@ namespace Chess.ChessControl
             _startLoc = new Location();
             _endLoc = new Location();
             _turn = 1;
-            _sq = null;
+            _selectedSquare = null;
             _promotion = 0;
         }
 
@@ -103,71 +110,240 @@ namespace Chess.ChessControl
         }
         #endregion
 
-        #region Place/Move/Capture Piece
+        #region Process Piece/Move
         /// <summary>
-        /// If the color of the desired piece is in line with the current player's turn,
-        /// then it checks the movements of the piece to see if the new location for
-        /// the piece is a legal move.
-        /// 
-        /// Moves a piece from it's start location to the desired location.
-        /// Prints out where the piece moved too, in plain english.
+        /// Processes the desired piece to move.
+        /// If the input is really a piece, then it stores the piece's location and highlights
+        /// all moves for the current selected piece.
         /// </summary>
-        /// <param name="endSquare">A square on the board that the piece will move too.</param>
-        public void MovePiece(UniformGrid grid, string endSquare)
+        /// <param name="board">A grid representing the board.</param>
+        /// <param name="input">A string that represents a piece.</param>
+        /// <param name="pattern">A pattern to interpret the piece.</param>
+        public void ProcessPiece(UniformGrid board, string input, string pattern)
         {
-            _endLoc.X = GrabRow(endSquare[1]);
-            _endLoc.Y = GrabColumn(endSquare[0]);
-            if ((int)Board.Squares[_startLoc.X, _startLoc.Y].Piece.Color == Turn)
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success)
             {
-                RemovePieceMovement(grid, _startLoc.X, _startLoc.Y);
-                if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.CheckMovement(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y) == true)
+                if (match.Length == PIECE_LENGTH)
                 {
-                    if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                    if (inCheck != true)
                     {
-                        ChangeTurn();
-                        IsInCheckMate(Turn);
+                        _startSquare = match.Groups[1].Value + match.Groups[2].Value;
+                        _startLoc.X = GrabRow(match.Groups[2].Value[0]);
+                        _startLoc.Y = GrabColumn(match.Groups[1].Value[0]);
+                        PrintPieceMovement(board, _startLoc.X, _startLoc.Y);
                     }
                     else
                     {
-                        ChangeTurn();
+                        _startSquare = match.Groups[1].Value + match.Groups[2].Value;
+                        _startLoc.X = GrabRow(match.Groups[2].Value[0]);
+                        _startLoc.Y = GrabColumn(match.Groups[1].Value[0]);
+                        CanSaveKing(_startLoc.X, _startLoc.Y);
                     }
-                    Board.Squares[_startLoc.X, _startLoc.Y].Piece.MovePiece(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
-                    CheckKingSideCastle();
-                    EnPassant(Board.Squares, _endLoc.X, _endLoc.Y);
-                    l.Content = ("The piece at " + _startSquare + " moved to " + endSquare + ".");
-                    Image img = (Image)((Square)grid.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic;
-                    ((Square)grid.Children[(_startLoc.X * 8) + _startLoc.Y]).Panel.Children.Clear();
-                    ((Square)grid.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic = null;
-                    ((Square)grid.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Clear();
-                    ((Square)grid.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Add(img);
-                    ((Square)grid.Children[(_endLoc.X * 8) + _endLoc.Y]).Pic = img;
-                    ResetSquares(_sq, _sq.loc.X, _sq.loc.Y);
-                    _sq = null;
-                    IsInCheck(Turn);
-                    BeginPromotion();
-
                 }
-                else
+            }
+        }
+        /// <summary>
+        /// Reads the user's desired move for a selected piece.
+        /// </summary>
+        /// <param name="board">A grid representing the board.</param>
+        /// <param name="input">A string that represents a move for the selected piece.</param>
+        /// <param name="pattern">A pattern to interpret the move.</param>
+        public void ProcessMove(UniformGrid board, string input, string pattern)
+        {
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success)
+            {
+                if (match.Length == PIECE_LENGTH)
                 {
-                    PrintPieceMovement(grid, _startLoc.X, _startLoc.Y);
-                    MessageBox.Show("Invalid piece movement, please try again...");
+                    MovePiece(board, (match.Groups[1].Value + "" + match.Groups[2].Value));
+                }
+            }
+        }
+        #endregion
+
+        #region Move/Castling
+        /// <summary>
+        /// Checks if the movements of the piece is a valid movement.
+        /// 
+        /// If it is Valid, it moves the piece to the desired location.
+        /// It checks for castleing, and En Passant.
+        /// Updates a label where everything describing the movement in readable english.
+        /// Changes the image from the old location to the new location.
+        /// Removes the highlight for the selected piece.
+        /// Removes the highlighted squares that show where the piece can move.
+        /// Deselects the selected piece.
+        /// Checks for pawn promotion.
+        /// Checks if the for checkmate if the selected piece not a king and changes turn.
+        /// </summary>
+        /// <param name="endSquare">A square on the board that the piece will move too.</param>
+        public void MovePiece(UniformGrid board, string endSquare)
+        {
+            _endLoc.X = GrabRow(endSquare[1]);
+            _endLoc.Y = GrabColumn(endSquare[0]);
+
+            RemovePieceMovement(board, _startLoc.X, _startLoc.Y);
+
+            if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.CheckMovement(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y) == true)
+            {
+                if (inCheck == false)//*****************************************************
+                {
+                    if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                    {
+                        bool isValid = WillKingCheck(_startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
+                        if (isValid == false)
+                        {
+                            Board.Squares[_startLoc.X, _startLoc.Y].Piece.MovePiece(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
+                            CheckKingSideCastle();
+                            l.Content = ("The piece at " + _startSquare + " moved to " + endSquare + ".");
+                            Image img = (Image)((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic;
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic = null;
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Add(img);
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Pic = img;
+                            SetDefaultBoardSquareColors(_selectedSquare, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                            _selectedSquare = null;
+                            CheckEnPassant(Board.Squares, _endLoc.X, _endLoc.Y);
+                            CheckPawnPromotion();
+                            if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                            {
+                                ChangeTurn();
+                                IsInCheckMate(Turn);
+                            }
+                            else
+                            {
+                                ChangeTurn();
+                            }
+                            MovablePieces();
+                        }
+                        else
+                        {
+                            PrintPieceMovement(board, _startLoc.X, _startLoc.Y);
+                            MessageBox.Show("Don't put the king check!!!");
+                        }
+                    }
+                    else
+                    {
+                        bool isValid = KingInCheck(_endLoc.X, _endLoc.Y);
+                        if(isValid == true)
+                        {
+                            Board.Squares[_startLoc.X, _startLoc.Y].Piece.MovePiece(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
+                            CheckKingSideCastle();
+                            l.Content = ("The piece at " + _startSquare + " moved to " + endSquare + ".");
+                            Image img = (Image)((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic;
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic = null;
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Add(img);
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Pic = img;
+                            SetDefaultBoardSquareColors(_selectedSquare, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                            _selectedSquare = null;
+                            if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                            {
+                                ChangeTurn();
+                                IsInCheckMate(Turn);
+                            }
+                            else
+                            {
+                                ChangeTurn();
+                            }
+                            MovablePieces();
+                        }
+                        else
+                        {
+                            PrintPieceMovement(board, _startLoc.X, _startLoc.Y);
+                            MessageBox.Show("Don't go back in check!!!");
+                        }
+                    }
+                }
+                else//*****************************************************
+                {
+                    if (WillSaveTheKing(_startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y) == true)
+                    {
+                        if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                        {
+                            Board.Squares[_startLoc.X, _startLoc.Y].Piece.MovePiece(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
+                            l.Content = ("The piece at " + _startSquare + " moved to " + endSquare + ".");
+                            Image img = (Image)((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic;
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic = null;
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Clear();
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Add(img);
+                            ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Pic = img;
+                            SetDefaultBoardSquareColors(_selectedSquare, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                            _selectedSquare = null;
+                            CheckEnPassant(Board.Squares, _endLoc.X, _endLoc.Y);
+                            CheckPawnPromotion();
+                            if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                            {
+                                ChangeTurn();
+                                IsInCheckMate(Turn);
+                            }
+                            else
+                            {
+                                ChangeTurn();
+                            }
+                            MovablePieces();
+                        }
+                        else
+                        {
+                            bool isValid = KingInCheck(_endLoc.X, _endLoc.Y);
+                            if (isValid == true)
+                            {
+                                Board.Squares[_startLoc.X, _startLoc.Y].Piece.MovePiece(Board.Squares, _startLoc.X, _startLoc.Y, _endLoc.X, _endLoc.Y);
+                                CheckKingSideCastle();
+                                l.Content = ("The piece at " + _startSquare + " moved to " + endSquare + ".");
+                                Image img = (Image)((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic;
+                                ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Panel.Children.Clear();
+                                ((Square)board.Children[(_startLoc.X * 8) + _startLoc.Y]).Pic = null;
+                                ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Clear();
+                                ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Panel.Children.Add(img);
+                                ((Square)board.Children[(_endLoc.X * 8) + _endLoc.Y]).Pic = img;
+                                SetDefaultBoardSquareColors(_selectedSquare, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                                _selectedSquare = null;
+                                if (Board.Squares[_startLoc.X, _startLoc.Y].Piece.GetType() != typeof(King))
+                                {
+                                    ChangeTurn();
+                                    IsInCheckMate(Turn);
+                                }
+                                else
+                                {
+                                    ChangeTurn();
+                                }
+                                MovablePieces();
+                            }
+                            else
+                            {
+                                PrintPieceMovement(board, _startLoc.X, _startLoc.Y);
+                                MessageBox.Show("Don't go back in check!!!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CanSaveKing(_startLoc.X, _startLoc.Y);
+                        MessageBox.Show("Save your king!!!");
+                        MovablePieces();
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Invalid movement, please try again.");
+                PrintPieceMovement(board, _startLoc.X, _startLoc.Y);
+                MessageBox.Show("Invalid piece movement, please try again...");
             }
         }
         /// <summary>
-        /// Moves a King left/right 2 squares, while moving a Rook to the right/left of the King.
-        /// Describes the actions of king-side-castle.
-        /// Print out where the pieces moved too, in plain english.
+        /// Checks if the current turn is that of a specific color.
+        /// If so, then checks if the king is in the position of doing left or right caslting.
+        /// If so, it checks if the king has move once.
+        /// If so, then it checks if a specific square contains a rook.
+        /// If so, then move rook to perform castleing.
         /// </summary>
-        /// <param name="square1">The starting point of the king</param>
-        /// <param name="square2">The end point for the king.</param>
-        /// <param name="square3">The starting point of the Rook.</param>
-        /// <param name="square4">The end point for the Rook.</param>
-        public void CheckKingSideCastle()//Refactoring should be done later.
+        public void CheckKingSideCastle()
         {
             if (Turn == (int)ChessColor.LIGHT)
             {
@@ -175,32 +351,38 @@ namespace Chess.ChessControl
                 {
                     if (((King)Board.Squares[7, 6].Piece).moveAmount == 1)//Right
                     {
-                        int startX = Board.Squares[7, 7].Loc.X;//Left
-                        int startY = Board.Squares[7, 7].Loc.Y;
-                        Board.Squares[7, 7].Piece.MovePiece(Board.Squares,startX, startY, startX, startY - 2);
+                        if(Board.Squares[7, 7].Piece.GetType() == typeof(Rook))
+                        {
+                            int startX = Board.Squares[7, 7].Loc.X;//Left
+                            int startY = Board.Squares[7, 7].Loc.Y;
+                            Board.Squares[7, 7].Piece.MovePiece(Board.Squares, startX, startY, startX, startY - 2);
 
-                        Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
-                        ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + startY]).Pic = null;
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Add(img);
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Pic = img;
+                            Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
+                            ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + startY]).Pic = null;
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Add(img);
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Pic = img;
+                        }
                     }
                 }
                 else if (Board.Squares[7, 2].Piece.GetType() == typeof(King))//Left
                 {
                     if (((King)Board.Squares[7, 2].Piece).moveAmount == 1)//Left
                     {
-                        int startX = Board.Squares[7, 0].Loc.X;//Right
-                        int startY = Board.Squares[7, 0].Loc.Y;
-                        Board.Squares[7, 0].Piece.MovePiece(Board.Squares, startX, startY, startX, startY + 3);
+                        if (Board.Squares[7, 0].Piece.GetType() == typeof(Rook))
+                        {
+                            int startX = Board.Squares[7, 0].Loc.X;//Right
+                            int startY = Board.Squares[7, 0].Loc.Y;
+                            Board.Squares[7, 0].Piece.MovePiece(Board.Squares, startX, startY, startX, startY + 3);
 
-                        Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
-                        ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + startY]).Pic = null;
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Add(img);
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Pic = img;
+                            Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
+                            ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + startY]).Pic = null;
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Add(img);
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Pic = img;
+                        }
                     }
                 }
             }
@@ -210,77 +392,268 @@ namespace Chess.ChessControl
                 {
                     if (((King)Board.Squares[0, 6].Piece).moveAmount == 1)//Right
                     {
-                        int startX = Board.Squares[0, 7].Loc.X;//Left
-                        int startY = Board.Squares[0, 7].Loc.Y;
-                        Board.Squares[0, 7].Piece.MovePiece(Board.Squares, startX, startY, startX, startY - 2);
+                        if (Board.Squares[0, 7].Piece.GetType() == typeof(Rook))
+                        {
+                            int startX = Board.Squares[0, 7].Loc.X;//Left
+                            int startY = Board.Squares[0, 7].Loc.Y;
+                            Board.Squares[0, 7].Piece.MovePiece(Board.Squares, startX, startY, startX, startY - 2);
 
-                        Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
-                        ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + startY]).Pic = null;
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Add(img);
-                        ((Square)g.Children[(startX * 8) + (startY - 2)]).Pic = img;
+                            Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
+                            ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + startY]).Pic = null;
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Panel.Children.Add(img);
+                            ((Square)g.Children[(startX * 8) + (startY - 2)]).Pic = img;
+                        }
                     }
                 }
                 else if (Board.Squares[0, 2].Piece.GetType() == typeof(King))//Left
                 {
                     if (((King)Board.Squares[0, 2].Piece).moveAmount == 1)//Left
                     {
-                        int startX = Board.Squares[0, 0].Loc.X;//Right
-                        int startY = Board.Squares[0, 0].Loc.Y;
-                        Board.Squares[0, 0].Piece.MovePiece(Board.Squares, startX, startY, startX, startY + 3);
+                        if (Board.Squares[0, 0].Piece.GetType() == typeof(Rook))
+                        {
+                            int startX = Board.Squares[0, 0].Loc.X;//Right
+                            int startY = Board.Squares[0, 0].Loc.Y;
+                            Board.Squares[0, 0].Piece.MovePiece(Board.Squares, startX, startY, startX, startY + 3);
 
-                        Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
-                        ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + startY]).Pic = null;
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Clear();
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Add(img);
-                        ((Square)g.Children[(startX * 8) + (startY + 3)]).Pic = img;
+                            Image img = (Image)((Square)g.Children[(startX * 8) + startY]).Pic;
+                            ((Square)g.Children[(startX * 8) + startY]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + startY]).Pic = null;
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Clear();
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Panel.Children.Add(img);
+                            ((Square)g.Children[(startX * 8) + (startY + 3)]).Pic = img;
+                        }
                     }
                 }
             }
         }
+        /// <summary>
+        /// Checks if the movement of a king will put it back in check.
+        /// </summary>
+        /// <param name="endX"></param>
+        /// <param name="endY"></param>
+        /// <returns>
+        /// True: If the movement of the king will not put the king in check.
+        /// False: If the movement of the king will put the king in check
+        /// </returns>
+        public bool KingInCheck(int endX, int endY)
+        {
+            bool isValid = true;
+            ChessPiece pieceHolder = Board.Squares[endX, endY].Piece;
+            Board.Squares[endX, endY].Piece = new Space();
+            List<int[]> enemyMovements = StoreAllEnemyMovements();//Get all enemy moves
+
+            for (int x = 0; x < enemyMovements.Count; ++x)
+            {
+                if (endX == enemyMovements[x][0] && endY == enemyMovements[x][1])
+                {
+                    isValid = false;
+                }
+            }
+            Board.Squares[endX, endY].Piece = pieceHolder;
+            return isValid;
+        }
+        public bool WillKingCheck(int startX, int startY, int endX, int endY)
+        {
+            bool isValid = false;
+            int[] king = new int[2];
+            //********
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; ++y)
+                {
+                    if((int)Board.Squares[x, y].Piece.Color == Turn)
+                    {
+                        if (Board.Squares[x, y].Piece is King)
+                        {
+                            king = new int[] { x, y };
+                        }
+                    }
+                }
+            }
+            //********
+            ChessPiece pieceHolder = Board.Squares[startX, startY].Piece;
+            Board.Squares[endX, endY].Piece = Board.Squares[startX, startY].Piece;
+            Board.Squares[startX, startY].Piece = new Space();
+
+            List<int[]> enemyMovements = StoreAllEnemyMovements();//Get all enemy moves
+
+            for (int x = 0; x < enemyMovements.Count; ++x)
+            {
+                if (king[0] == enemyMovements[x][0] && king[1] == enemyMovements[x][1])
+                {
+                    isValid = true;
+                }
+            }
+            Board.Squares[startX, startY].Piece = pieceHolder;
+            Board.Squares[endX, endY].Piece = new Space();
+            return isValid;
+        }
         #endregion
 
-        #region Process
+        #region SaveKingFromCheck
         /// <summary>
-        /// Processes the desired piece to move.
-        /// If the input is really a piece, then it stores the string and prints out all moves for that piece.
+        /// If the piece contains a movement that can save the king, then the piece if selected,
+        /// will have it's movements that will save the king highlighted.
         /// </summary>
-        /// <param name="input">A string that represents a piece.</param>
-        /// <param name="pattern">A pattern to interpret the piece.</param>
-        public void ProcessPiece(UniformGrid grid, string input, string pattern)
+        /// <param name="j"></param>
+        /// <param name="k"></param>
+        public void CanSaveKing(int j, int k)
         {
-            Match match = Regex.Match(input, pattern);
-
-            if (match.Success)
+            List<int[]> enemyMovement;
+            List<int[]> allyMovement = new List<int[]>();
+            List<int[]> kingMovement = new List<int[]>();
+            List<int[]> ally = new List<int[]>();
+            List<int[]> movement = new List<int[]>();
+            Location l = new Location();
+            Location l2 = new Location();
+            enemyMovement = StoreEnemyMovements();
+            for (int x = 0; x < 8; ++x)
             {
-                if (match.Length == PIECE_LENGTH)
+                for (int y = 0; y < 8; ++y)
                 {
-                    _startSquare = match.Groups[1].Value + match.Groups[2].Value;
-                    _startLoc.X = GrabRow(match.Groups[2].Value[0]);
-                    _startLoc.Y = GrabColumn(match.Groups[1].Value[0]);
-                    PrintPieceMovement(grid, _startLoc.X, _startLoc.Y);
+                    if ((int)Board.Squares[x, y].Piece.Color == Turn)
+                    {
+                        if (Board.Squares[x, y].Piece.GetType() != typeof(King))
+                        {
+                            List<int[]> temp = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
+                            for (int z = 0; z < temp.Count; ++z)
+                            {
+                                for (int w = 0; w < enemyMovement.Count; ++w)
+                                {
+                                    if (temp[z][0] == enemyMovement[w][0] && temp[z][1] == enemyMovement[w][1])
+                                    {
+                                        ally.Add(new int[] { x, y });
+                                        allyMovement.Add(temp[z]);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            List<int[]> kingMoves = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
+                            for (int z = 0; z < kingMoves.Count; ++z)
+                            {
+                                for (int w = 0; w < enemyMovement.Count; ++w)
+                                {
+                                    //if (kingMoves[z][0] == enemyMovement[w][0] && kingMoves[z][1] == enemyMovement[w][1])
+                                    //{
+                                    //    if (Board.Squares[enemyMovement[w][0], enemyMovement[w][1]].Piece.GetType() != typeof(Space))
+                                    //    {
+                                    //        ((Square)g.Children[(kingMoves[z][0] * 8) + kingMoves[z][1]]).Background = Brushes.LightYellow;
+                                    //    }
+                                    //}
+                                    /*else*/ if (kingMoves[z][0] != enemyMovement[w][0] || kingMoves[z][1] != enemyMovement[w][1])
+                                    {
+                                        kingMovement.Add(kingMoves[z]);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+            }
+            a = ally;
+            if (Board.Squares[j, k].Piece.GetType() != typeof(King))
+            {
+                movement = Board.Squares[j, k].Piece.RestrictMovement(Board.Squares, j, k);
+                for (int x = 0; x < allyMovement.Count; ++x)
+                {
+                    for (int y = 0; y < movement.Count; ++y)
+                    {
+                        l.X = allyMovement[x][0];
+                        l.Y = allyMovement[x][1];
+                        l2.X = movement[y][0];
+                        l2.Y = movement[y][1];
+                        if (allyMovement[x][0] == movement[y][0] && allyMovement[x][1] == movement[y][1])
+                        {
+                            ((Square)g.Children[(allyMovement[x][0] * 8) + allyMovement[x][1]]).Background = Brushes.Plum;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                PrintKingMoves(j, k);
             }
         }
         /// <summary>
-        /// Reads the user's desired move for a selected piece and passes them to other methods 
-        /// that will print them out in readable english.
+        /// Checks if the selected piece's desired location willl take the king out of check.
         /// </summary>
-        /// <param name="input">A string that represents a move for the selected piece.</param>
-        /// <param name="pattern">A pattern to interpret the move.</param>
-        public void ProcessMove(UniformGrid grid, string input, string pattern)
+        /// <param name="endX"></param>
+        /// <param name="endY"></param>
+        /// <returns>
+        /// True: If the desired location for the piece will take the king out of chess.
+        /// False: If the desired location for the piece will not take the king out of chess.
+        /// </returns>
+        public bool WillSaveTheKing(int startX, int startY, int endX, int endY)
         {
-            Match match = Regex.Match(input, pattern);
-
-            if (match.Success)
+            List<int[]> enemyMovement;
+            List<int[]> ally = new List<int[]>();
+            List<int[]> movement = new List<int[]>();
+            Location l = new Location();
+            bool temp = true;
+            enemyMovement = StoreEnemyMovements();
+            bool isValid = false;
+            for (int x = 0; x < 8; ++x)
             {
-                if (match.Length == PIECE_LENGTH)
+                for (int y = 0; y < 8; ++y)
                 {
-                    MovePiece(grid, (match.Groups[1].Value + "" + match.Groups[2].Value));
+                    if ((int)Board.Squares[x, y].Piece.Color == Turn)
+                    {
+                        if (Board.Squares[x, y].Piece.GetType() != typeof(King))
+                        {
+                            for (int w = 0; w < enemyMovement.Count; ++w)
+                            {
+                                l.X = enemyMovement[w][0];
+                                l.Y = enemyMovement[w][1];
+                                if (endX == enemyMovement[w][0] && endY == enemyMovement[w][1])
+                                {
+                                    isValid = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Board.Squares[startX, startY].Piece.GetType() == typeof(King))
+                            {
+                                bool valid = WillKingCheck(startX, startY, endX, endY);
+                                if (valid == true)
+                                {
+                                    for (int w = 0; w < enemyMovement.Count; ++w)
+                                    {
+                                        if (endX == enemyMovement[w][0] && endY == enemyMovement[w][1])
+                                        {
+                                            if (Board.Squares[enemyMovement[w][0], enemyMovement[w][1]].Piece.GetType() == typeof(Space))
+                                            {
+                                                temp = false;
+                                            }
+                                            else
+                                            {
+                                                isValid = true;
+                                            }
+                                        }
+                                        else if (endX != enemyMovement[w][0] || endY != enemyMovement[w][1])
+                                        {
+                                            isValid = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    temp = false;
+                                }
+                            }
+                        }
+                    }
                 }
             }
+            if (temp == false)
+            {
+                isValid = temp;
+            }
+            return isValid;
         }
         #endregion
 
@@ -305,47 +678,55 @@ namespace Chess.ChessControl
 
         #region PrintPieceMovement
         /// <summary>
-        /// Prints out all legal movement of the selected piece.
+        /// Prints out all legal movement of the selected piece by highlighting(change button backgrounds)
+        /// to a specific color.
+        /// 
+        /// Lightgreen: Legal move.
+        /// light-Salmon: Legal move that will capture a piece.
         /// </summary>
         /// <param name="x">Row number from a 2-D Array.</param>
         /// <param name="y">Column number from a 2-D Array.</param>
         public void PrintPieceMovement(UniformGrid grid, int x, int y)
         {
             List<int[]> movement;
-            //if (Board.Squares[x, y].Piece.GetType() != typeof(King))
-            //{
-                movement = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
-            //}
-            //else
-            //{
-            //    movement = ((King)Board.Squares[x, y].Piece).AvoidCheck(Board.Squares, x, y);
-            //}
-            string[] stringPiece = GrabPiece(x, y);
-            for (int j = 0; j < movement.Count; ++j)
+            if (Board.Squares[x, y].Piece.GetType() != typeof(King))
             {
-                string[] stringMovement = GrabPiece(movement[j][0], movement[j][1]);//Word is equal to a move.
-                if (Board.Squares[movement[j][0], movement[j][1]].Piece.Color == ChessColor.NONE)
+                movement = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
+
+                string[] stringPiece = GrabPiece(x, y);
+                for (int j = 0; j < movement.Count; ++j)
                 {
-                    ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.LightGreen;
-                }
-                if (Board.Squares[movement[j][0], movement[j][1]].Piece.Color != ChessColor.NONE)
-                {
-                    if ((int)Board.Squares[movement[j][0], movement[j][1]].Piece.Color != Turn)
+                    string[] stringMovement = GrabPiece(movement[j][0], movement[j][1]);//Word is equal to a move.
+                    if (Board.Squares[movement[j][0], movement[j][1]].Piece.Color == ChessColor.NONE)
                     {
-                        ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.LightSalmon;
+                        ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.LightGreen;
+                    }
+                    if (Board.Squares[movement[j][0], movement[j][1]].Piece.Color != ChessColor.NONE)
+                    {
+                        if ((int)Board.Squares[movement[j][0], movement[j][1]].Piece.Color != Turn)
+                        {
+                            ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.LightSalmon;
+                        }
                     }
                 }
             }
-            movement = null;
+            else
+            {
+                PrintKingMoves(x, y);
+            }
         }
-
+        /// <summary>
+        /// Removes all legal movement of the selected piece and resets the color to their
+        /// default color.
+        /// </summary>
+        /// <param name="x">Row number from a 2-D Array.</param>
+        /// <param name="y">Column number from a 2-D Array.</param>
         public void RemovePieceMovement(UniformGrid grid, int x, int y)
         {
             List<int[]> movement = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
             string[] stringPiece = GrabPiece(x, y);
             for (int j = 0; j < movement.Count; ++j)
             {
-                string[] stringMovement = GrabPiece(movement[j][0], movement[j][1]);//Word is equal to a move.
                 if (Board.Squares[movement[j][0], movement[j][1]].Color == ChessColor.DARK)
                 {
                     ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.Gray;
@@ -355,13 +736,193 @@ namespace Chess.ChessControl
                     ((Square)grid.Children[(movement[j][0] * 8) + movement[j][1]]).Background = Brushes.LightGray;
                 }
             }
+            if (inCheck == true)
+            {
+                if (((Square)g.Children[(x * 8) + y]).Background == Brushes.CornflowerBlue)
+                {
+                    for (int a = 0; a < 8; ++a)
+                    {
+                        for (int b = 0; b < 8; ++b)
+                        {
+                            if (Board.Squares[a, b].Color == ChessColor.DARK)
+                            {
+                                ((Square)g.Children[(a * 8) + b]).Background = Brushes.Gray;
+                            }
+                            else if (Board.Squares[x, y].Color == ChessColor.LIGHT)
+                            {
+                                ((Square)g.Children[(a * 8) + b]).Background = Brushes.LightGray;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// If the king is in check, then highlight all the pieces that can save the king.
+        /// Otherwise set their color back to default.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void MovablePieces()
+        {
+            if (inCheck == true)
+            {
+                PrintPieceMovement();
+            }
+            else
+            {
+                RemovePieceMovement();
+            }
+        }
+        /// <summary>
+        /// Gets enemy movement leading to the king and stores it.
+        /// Loops through the ally pieces and chscks their movement to counter against the enemy's movement.
+        /// If a piece's movement counters, then the piece is highlighted in plum
+        /// 
+        /// Plum: When a ally piece can save the king.
+        /// </summary>
+        public void PrintPieceMovement()
+        {
+            List<int[]> enemyMovement;
+            List<int[]> ally = new List<int[]>();
+            enemyMovement = StoreEnemyMovements();
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; ++y)
+                {
+                    if ((int)Board.Squares[x, y].Piece.Color == Turn)
+                    {
+                        if (Board.Squares[x, y].Piece.GetType() != typeof(King))
+                        {
+                            List<int[]> temp = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
+                            for (int z = 0; z < temp.Count; ++z)
+                            {
+                                for (int w = 0; w < enemyMovement.Count; ++w)
+                                {
+                                    if (temp[z][0] == enemyMovement[w][0] && temp[z][1] == enemyMovement[w][1])
+                                    {
+                                        ally.Add(new int[] { x, y });
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            List<int[]> temp = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, x, y);
+                            for (int z = 0; z < temp.Count; ++z)
+                            {
+                                for (int w = 0; w < enemyMovement.Count; ++w)
+                                {
+                                    if (temp[z][0] == enemyMovement[w][0] && temp[z][1] == enemyMovement[w][1])
+                                    {
+
+                                    }
+                                    else if (temp[z][0] != enemyMovement[w][0] || temp[z][1] != enemyMovement[w][1])
+                                    {
+                                        ally.Add(new int[] { x, y });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int x = 0; x < ally.Count; ++x)
+            {
+                ((Square)g.Children[(ally[x][0] * 8) + ally[x][1]]).Background = Brushes.Plum;
+            }
+        }
+        /// <summary>
+        /// Removes all legal movement of the selected piece and resets the color to their
+        /// default color.
+        /// </summary>
+        public void RemovePieceMovement()
+        {
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; ++y)
+                {
+                    if (inCheck != true)
+                    {
+                        if (((Square)g.Children[(x * 8) + y]).Background == Brushes.Plum)
+                        {
+                            for (int j = 0; j < 64; ++j)
+                            {
+                                if (Board.Squares[x, y].Color == ChessColor.DARK)
+                                {
+                                    ((Square)g.Children[(x * 8) + y]).Background = Brushes.Gray;
+                                }
+                                else if (Board.Squares[x, y].Color == ChessColor.LIGHT)
+                                {
+                                    ((Square)g.Children[(x * 8) + y]).Background = Brushes.LightGray;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Highlights where the king shouldn't go to avoid check.
+        /// </summary>
+        /// <param name="startX"></param>
+        /// <param name="startY"></param>
+        public void PrintKingMoves(int startX, int startY)
+        {
+            List<int[]> enemyMovements = StoreAllEnemyMovements();
+            List<int[]> kingMovement = Board.Squares[startX, startY].Piece.RestrictMovement(Board.Squares, startX, startY);
+            if (inCheck == false)
+            {
+                for (int x = 0; x < enemyMovements.Count; ++x)
+                {
+                    for (int y = 0; y < kingMovement.Count; ++y)
+                    {
+                        if (kingMovement[y][0] == enemyMovements[x][0] && kingMovement[y][1] == enemyMovements[x][1])
+                        {
+                            ((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background = Brushes.LightYellow;
+                        }
+                        else if (((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background != Brushes.LightYellow)
+                        {
+                            if (kingMovement[y][0] != enemyMovements[x][0] && kingMovement[y][1] != enemyMovements[x][1])
+                            {
+                                ((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background = Brushes.LightGreen;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int x = 0; x < enemyMovements.Count; ++x)
+                {
+                    for (int y = 0; y < kingMovement.Count; ++y)
+                    {
+                        if (kingMovement[y][0] == enemyMovements[x][0] && kingMovement[y][1] == enemyMovements[x][1])
+                        {
+                            ((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background = Brushes.LightYellow;
+                        }
+                        if (((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background != Brushes.LightYellow)
+                        {
+                            //if (Board.Squares[enemyMovements[x][0], enemyMovements[x][1]].Piece.GetType() != typeof(Space))
+                            //{
+                            //    ((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background = Brushes.LightYellow;
+                            //}
+                            if (kingMovement[y][0] != enemyMovements[x][0] && kingMovement[y][1] != enemyMovements[x][1])
+                            {
+                                ((Square)g.Children[(kingMovement[y][0] * 8) + kingMovement[y][1]]).Background = Brushes.Plum;
+                            }
+
+                        }
+                    }
+                }
+            }
         }
         #endregion
 
         #region Checks
         /// <summary>
         /// Grabs all available legal moves from every piece and checks if an
-        /// available legal move from that piece can kill the opposite colored  king.
+        /// available legal move from that piece can kill the opposite colored king.
         /// Prints out the kings status.
         /// </summary>
         ///<returns>
@@ -374,7 +935,7 @@ namespace Chess.ChessControl
             List<int[]> Pieces = new List<int[]>();
             int[] lKing = new int[2];//Light king's location.
             int[] dKing = new int[2];//Dark king's location.
-            bool inCheck = false;
+            inCheck = false;
             for (int x = 0; x < 8; ++x)
             {
                 for (int y = 0; y < 8; y++)
@@ -640,44 +1201,22 @@ namespace Chess.ChessControl
 
         #region PawnPromtion
         /// <summary>
-        /// Checks if the current square has a pawn.
+        /// Checks for a pawn in squares that need a pawn for pawn promotion. If a square does have a pawn,
+        /// it will prompt the user to promote the pawn to another piece.
         /// </summary>
-        /// <param name="x">Row number from a chess board or the X coordinate of a 2-D array.</param>
-        /// <param name="y">Column number from a chess board or the Y coordinate of a 2-D array.</param>
-        /// <returns>
-        /// True: If the square does contain a pawn.
-        /// False: If the square does not contain a pawn.
-        /// </returns>
-        public bool Contains(int x, int y)
-        {
-            bool containsPawn = false;
-            if(Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
-            {
-                containsPawn = true;
-            }
-            else if (Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
-            {
-                containsPawn = true;
-            }
-            return containsPawn;
-        }
-        /// <summary>
-        /// Checks certain squares for a pawn. If a square does have a pawn, it will prompt the user to promote the pawn
-        /// to another piece.
-        /// </summary>
-        public void BeginPromotion()
+        public void CheckPawnPromotion()
         {
             bool containsPawn = false;
             square = new int[2];
             for (int y = 0; y < 8; ++y)
             {
-                containsPawn = Contains(0, y);
+                containsPawn = SquareContainsPawn(0, y);
                 if (containsPawn == true)
                 {
                     square = new int[] { 0, y };
                     break;
                 }
-                containsPawn = Contains(7, y);
+                containsPawn = SquareContainsPawn(7, y);
                 if (containsPawn == true)
                 {
                     square = new int[] { 7, y };
@@ -691,11 +1230,32 @@ namespace Chess.ChessControl
             }
         }
         /// <summary>
-        /// Asks the user what piece they would like the pawn to be.
-        /// It will then set a type chess piece to the desired piece.
+        /// Checks if the current square has a pawn.
         /// </summary>
-        /// <param name="pawnColor">Color of the pawn being promoted.</param>
-        /// <returns>returns a piece for the pawn.</returns>
+        /// <param name="x">Row number from a chess board or the X coordinate of a 2-D array.</param>
+        /// <param name="y">Column number from a chess board or the Y coordinate of a 2-D array.</param>
+        /// <returns>
+        /// True: If the square does contain a pawn.
+        /// False: If the square does not contain a pawn.
+        /// </returns>
+        public bool SquareContainsPawn(int x, int y)
+        {
+            bool containsPawn = false;
+            if (Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
+            {
+                containsPawn = true;
+            }
+            else if (Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
+            {
+                containsPawn = true;
+            }
+            return containsPawn;
+        }
+        /// <summary>
+        /// Makes a label and it's buttons visible, prompting the user if they would like
+        /// to promote their pawn.
+        /// Disables the board to force the player to pick a piece to promote the pawn to.
+        /// </summary>
         public void SetUpPromotion()
         {
             g.IsEnabled = false;
@@ -704,145 +1264,204 @@ namespace Chess.ChessControl
                 g2.Children[x].Visibility = Visibility.Visible;
             }
         }
+        /// <summary>
+        /// Adds the handlers to the buttons that will promote the pawn.
+        /// </summary>
+        /// <param name="grid"></param>
+        public void SetPromoteButtons(UniformGrid grid)
+        {
+            g2 = grid;
+            for (int x = 1; x < 5; ++x)
+            {
+                ((Button)g2.Children[x]).Click += Button_PromoteHandler;
+            }
+        }
         #endregion
 
-        public void CreateBoard(UniformGrid grid, Label label, Label label2)
+        #region StoreEnemyMovements
+        /// <summary>
+        /// Loops through, getting enemy movements, and storing them.
+        /// Looks for the king of the current player and stores his location.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns>Returns a list of movements thats are directed to the king.</returns>
+        public List<int[]> StoreEnemyMovements()
         {
-            g = grid;
-            l = label;
-            l2 = label2;
+            List<int[]> enemyMovement = new List<int[]>();//A storage for all possible legal move for enemy pieces.
+            List<int[]> allyMovement = new List<int[]>();//A storage for all possible legal move for ally pieces.
+            List<int[]> enemy = new List<int[]>();//A placeholder for enemy movements
+            List<int[]> Pieces = new List<int[]>();//a list
+            int[] king = new int[2];//King's location.
+
             for (int x = 0; x < 8; ++x)
             {
-                for (int y = 0; y < 8; ++y)
+                for (int y = 0; y < 8; y++)
                 {
-                    Square s = new Square(Board.Squares[x, y].Piece.ToString());
-                    ResetSquares(s, x, y);
-                    s.loc.X = x;
-                    s.loc.Y = y;
-                    s.Click += Button_PieceHandler;
-                    s.MouseRightButtonDown += Button_RightClickHandler;
-                    grid.Children.Add(s);
-                }
-            }
-        }
-        
-        private void Button_PieceHandler(object sender, RoutedEventArgs e)
-        {
-            Square s = (Square)sender;
-            
-            if (_sq == null)
-            {
-                if (Board.Squares[s.loc.X, s.loc.Y].Piece.GetType() != typeof(Space))
-                {
-                    if ((int)Board.Squares[s.loc.X, s.loc.Y].Piece.Color == Turn)
+                    if ((int)Board.Squares[x, y].Piece.Color != Turn && Board.Squares[x, y].Piece.Color != ChessColor.NONE)
                     {
-                        string[] input = GrabPiece(s.loc.X, s.loc.Y);
-                        s.Background = Brushes.CornflowerBlue;
-                        ProcessPiece((UniformGrid)s.Parent, (input[0] + input[1]), @"([a-h])([1-8])");
-                        _sq = s;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Please select a piece with the correct color!!!");
-                    }
-                }
-            }
-            else
-            {
-                string[] input = GrabPiece(s.loc.X, s.loc.Y);
-                ProcessMove((UniformGrid)s.Parent, (input[0] + input[1]), @"([a-h])([1-8])");
-                ResetEnPassant();
-                IfKingsExist();
-            }
-        }
-        
-        public void EnPassant(ChessSquare[,] board, int x1, int y1)
-        {
-            if (board[x1, y1].Piece.GetType() == typeof(Pawn))
-            {
-                if ((x1 + 1) < 8)
-                {
-                    if (board[x1, y1].Piece.Color == ChessColor.LIGHT)
-                    {
-                        if (board[x1 + 1, y1].Piece.GetType() == typeof(Pawn))
+                        if (Board.Squares[x, y].Piece.GetType() != typeof(Pawn))
                         {
-                            MoveEnPassant(g, Board.Squares, x1 + 1, y1);
-                        }
-                    }
-                }
-                if ((x1 - 1) >= 0)
-                {
-                    if (board[x1, y1].Piece.Color == ChessColor.DARK)
-                    {
-                        if (board[x1 - 1, y1].Piece.GetType() == typeof(Pawn))
-                        {
-                            MoveEnPassant(g, Board.Squares, x1 - 1, y1);
-                        }
-                    }
-                }
-            }
-        }
-
-        public void MoveEnPassant(UniformGrid grid, ChessSquare[,] board, int x, int y)
-        {
-            board[x, y].Piece = new Space();
-            ((Square)grid.Children[(x * 8) + y]).Panel.Children.Clear();
-            ((Square)grid.Children[(x * 8) + y]).Pic = null;
-        }
-
-        public void ResetEnPassant()
-        {
-            for (int x = 0; x < 8; ++x)
-            {
-                for (int y = 0; y < 8; ++y)
-                {
-                    if (Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
-                    {
-                        if ((int)Board.Squares[x, y].Piece.Color == Turn)
-                        {
-                            if (((Pawn)Board.Squares[x, y].Piece).chance == true)
+                            Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
+                            pieceLoc.X = x;
+                            pieceLoc.Y = y;
+                            enemy = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
+                            for (int j = 0; j < enemy.Count; ++j)
                             {
-                                ((Pawn)Board.Squares[x, y].Piece).chance = false;
+                                enemyMovement.Add(enemy[j]);//Adds all possible legal enemy movements from the current piece being looped through.
+                                Pieces.Add(new int[] { pieceLoc.X, pieceLoc.Y });//Contains all piece's that have legal moves.
+                            }
+                        }
+                        else
+                        {
+                            Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
+                            pieceLoc.X = x;
+                            pieceLoc.Y = y;
+                            enemy = ((Pawn)Board.Squares[x, y].Piece).Attacks(Board.Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
+                            for (int j = 0; j < enemy.Count; ++j)
+                            {
+                                enemyMovement.Add(enemy[j]);//Adds all possible legal enemy movements from the current piece being looped through.
+                                Pieces.Add(new int[] { pieceLoc.X, pieceLoc.Y });//Contains all piece's that have legal moves.
+                            }
+                        }
+                    }
+                    else if ((int)Board.Squares[x, y].Piece.Color == Turn)
+                    {
+                        if (Board.Squares[x, y].Piece.GetType() == typeof(King))
+                        {
+                            king = new int[] { x, y };//Stores the king's location.
+                        }
+                    }
+                }
+            }
+            for (int x = 0; x < enemyMovement.Count; ++x)//Loops through all possible legal moves.
+            {
+                if (enemyMovement[x][0] == king[0] && enemyMovement[x][1] == king[1])//If an enemy movement is the same as the king's location.
+                {
+                    //Returns moves leading to the king's location.
+                    enemy = Board.Squares[Pieces[x][0], Pieces[x][1]].Piece.Search(Board.Squares, Pieces[x][0], Pieces[x][1], king[0], king[1]);
+                    enemy.Add(new int[] { Pieces[x][0], Pieces[x][1] });
+                    break;
+                }
+            }
+            return enemy;
+        }
+        /// <summary>
+        /// Gets all possible enemy moves.
+        /// </summary>
+        /// <returns></returns>
+        public List<int[]> StoreAllEnemyMovements()
+        {
+            List<int[]> enemyMovement = new List<int[]>();//A storage for all possible legal move for enemy pieces.
+            List<int[]> enemy = new List<int[]>();//A placeholder for enemy movements
+            List<int[]> Pieces = new List<int[]>();//a list
+
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    if ((int)Board.Squares[x, y].Piece.Color != Turn && Board.Squares[x, y].Piece.Color != ChessColor.NONE)
+                    {
+                        if (Board.Squares[x, y].Piece.GetType() != typeof(Pawn))
+                        {
+                            Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
+                            pieceLoc.X = x;
+                            pieceLoc.Y = y;
+                            enemy = Board.Squares[x, y].Piece.RestrictMovement(Board.Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
+                            for (int j = 0; j < enemy.Count; ++j)
+                            {
+                                enemyMovement.Add(enemy[j]);//Adds all possible legal enemy movements from the current piece being looped through.
+                            }
+                        }
+                        else
+                        {
+                            Location pieceLoc = new Location();//Gets the current piece's location, which will eventually loop through all pieces.
+                            pieceLoc.X = x;
+                            pieceLoc.Y = y;
+                            enemy = ((Pawn)Board.Squares[x, y].Piece).Attacks(Board.Squares, pieceLoc.X, pieceLoc.Y);//Gets all possible legal moves for current piece.
+                            for (int j = 0; j < enemy.Count; ++j)
+                            {
+                                enemyMovement.Add(enemy[j]);//Adds all possible legal enemy movements from the current piece being looped through.
                             }
                         }
                     }
                 }
             }
+            return enemyMovement;
         }
-        
-        private void Button_RightClickHandler(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region SetBoard
+        /// <summary>
+        /// Adds handlers to the buttons, while also adding the buttons to the board.
+        /// </summary>
+        /// <param name="board">A grid representing the board.</param>
+        /// <param name="movement">A label that will display the movemnt for every moved piece.</param>
+        /// <param name="playerTurns">A label that will display who's turn it is.</param>
+        public void CreateBoard(UniformGrid board, Label movement, Label playerTurns)
         {
-            Square s = (Square)sender;
-            if (_sq != null)
+            g = board;
+            l = movement;
+            l2 = playerTurns;
+            for (int x = 0; x < 8; ++x)
             {
-                ResetSquares(_sq, _sq.loc.X, _sq.loc.Y);
-                RemovePieceMovement((UniformGrid)_sq.Parent, _sq.loc.X, _sq.loc.Y);
-                _sq = null;
+                for (int y = 0; y < 8; ++y)
+                {
+                    Square s = new Square(Board.Squares[x, y].Piece.ToString());
+                    SetDefaultBoardSquareColors(s, x, y);
+                    s.loc.X = x;
+                    s.loc.Y = y;
+                    s.Click += Button_PieceHandler;
+                    s.MouseRightButtonDown += Button_RightClickHandler;
+                    g.Children.Add(s);
+                }
             }
         }
 
-        public void ResetSquares(Square s, int x, int y)
+        public void SetDefaultBoardSquareColors(Square s, int x, int y)
         {
-            if (Board.Squares[x, y].Color == ChessColor.DARK)
+            if(inCheck == false)
             {
-                s.Background = Brushes.Gray;
+                if (Board.Squares[x, y].Color == ChessColor.DARK)
+                {
+                    s.Background = Brushes.Gray;
+                }
+                else if (Board.Squares[x, y].Color == ChessColor.LIGHT)
+                {
+                    s.Background = Brushes.LightGray;
+                }
             }
-            else if (Board.Squares[x, y].Color == ChessColor.LIGHT)
+            else
             {
-                s.Background = Brushes.LightGray;
+                for(int z = 0; z < a.Count; ++z)
+                {
+                    if (a[z][0] == x && a[z][1] == y)
+                    {
+                        s.Background = Brushes.Plum;
+                    }
+                    else if (Board.Squares[x, y].Color == ChessColor.DARK)
+                    {
+                        s.Background = Brushes.Gray;
+                    }
+                    else if (Board.Squares[x, y].Color == ChessColor.LIGHT)
+                    {
+                        s.Background = Brushes.LightGray;
+                    }
+                }
             }
         }
-        
+        #endregion
         public void ResetGame()
         {
             _board = new ChessBoard();
             g.Children.Clear();
+            inCheck = false;
             CreateBoard(g, l, l2);
             _startLoc = new Location();
             _endLoc = new Location();
             ChangeTurn();
             _startSquare = null;
-            _sq = null;
+            _selectedSquare = null;
         }
 
         public void PrintWinner()
@@ -868,50 +1487,81 @@ namespace Chess.ChessControl
             }
         }
 
-        public void IfKingsExist()
+        //public void IfKingsExist()
+        //{
+        //    bool lightExist = false;
+        //    bool darkExist = false;
+        //    for (int x = 0; x < 8; ++x)
+        //    {
+        //        for (int y = 0; y < 8; ++y)
+        //        {
+        //            if (Board.Squares[x, y].Piece.GetType() == typeof(King))
+        //            {
+        //                if (Board.Squares[x, y].Piece.Color == ChessColor.DARK)
+        //                {
+        //                    darkExist = true;
+        //                }
+        //                else
+        //                {
+        //                    lightExist = true;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    if(lightExist == false)
+        //    {
+        //        PrintWinner();
+        //    }
+        //    else if (darkExist == false)
+        //    {
+        //        PrintWinner();
+        //    }
+        //}
+
+        #region ButtonHandlers
+        private void Button_PieceHandler(object sender, RoutedEventArgs e)
         {
-            bool lightExist = false;
-            bool darkExist = false;
-            for (int x = 0; x < 8; ++x)
+            Square s = (Square)sender;
+            
+            if (_selectedSquare == null)
             {
-                for (int y = 0; y < 8; ++y)
+                if (Board.Squares[s.loc.X, s.loc.Y].Piece.GetType() != typeof(Space))
                 {
-                    if (Board.Squares[x, y].Piece.GetType() == typeof(King))
-                    {
-                        if (Board.Squares[x, y].Piece.Color == ChessColor.DARK)
-                        {
-                            darkExist = true;
-                        }
-                        else
-                        {
-                            lightExist = true;
-                        }
-                    }
+                     if ((int)Board.Squares[s.loc.X, s.loc.Y].Piece.Color == Turn)
+                     {
+                         string[] input = GrabPiece(s.loc.X, s.loc.Y);
+                         s.Background = Brushes.CornflowerBlue;
+                         ProcessPiece((UniformGrid)s.Parent, (input[0] + input[1]), @"([a-h])([1-8])");
+                         _selectedSquare = s;
+                     }
+                     else
+                     {
+                         MessageBox.Show("Please select a piece with the correct color!!!");
+                     }
                 }
             }
-            if(lightExist == false)
+            else
             {
-                PrintWinner();
-            }
-            else if (darkExist == false)
-            {
-                PrintWinner();
+                string[] input = GrabPiece(s.loc.X, s.loc.Y);
+                ProcessMove((UniformGrid)s.Parent, (input[0] + input[1]), @"([a-h])([1-8])");
+                ResetEnPassant();
             }
         }
-
-        public void SetButtons(UniformGrid grid)
+        private void Button_RightClickHandler(object sender, RoutedEventArgs e)
         {
-            g2 = grid;
-            for (int x = 1; x < 5; ++x)
+            Square s = (Square)sender;
+            if (_selectedSquare != null)
             {
-                ((Button)g2.Children[x]).Click += Button_PromoteHandler;
+                SetDefaultBoardSquareColors(_selectedSquare, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                RemovePieceMovement((UniformGrid)_selectedSquare.Parent, _selectedSquare.loc.X, _selectedSquare.loc.Y);
+                MovablePieces();
+                _selectedSquare = null;
             }
         }
-
         private void Button_PromoteHandler(object sender, RoutedEventArgs e)
         {
             Button b = (Button)sender;
-            if(b.Name == "Queen")
+            if (b.Name == "Queen")
             {
                 _promotion = 1;
             }
@@ -966,12 +1616,86 @@ namespace Chess.ChessControl
             }
             g.IsEnabled = true;
         }
+        #endregion
+
+        #region En Passant
+        /// <summary>
+        /// Checks if the current piece is a pawn.
+        /// Checks if the sides of the piece is not the end of the board.
+        /// Checks the color of the selected piece.
+        /// Checks if the sides of the selected piece is a pawn.
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="x1">The selected piece's x coordinate</param>
+        /// <param name="y1">The selected piece's y coordinate</param>
+        public void CheckEnPassant(ChessSquare[,] board, int x1, int y1)
+        {
+            if (board[x1, y1].Piece.GetType() == typeof(Pawn))
+            {
+                if ((x1 + 1) < 8)
+                {
+                    if (board[x1, y1].Piece.Color == ChessColor.LIGHT)
+                    {
+                        if (board[x1 + 1, y1].Piece.GetType() == typeof(Pawn))
+                        {
+                            EnPassant(g, Board.Squares, x1 + 1, y1);
+                        }
+                    }
+                }
+                if ((x1 - 1) >= 0)
+                {
+                    if (board[x1, y1].Piece.Color == ChessColor.DARK)
+                    {
+                        if (board[x1 - 1, y1].Piece.GetType() == typeof(Pawn))
+                        {
+                            EnPassant(g, Board.Squares, x1 - 1, y1);
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Removes the pawn that got 
+        /// </summary>
+        /// <param name="grid"></param>
+        /// <param name="board"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void EnPassant(UniformGrid grid, ChessSquare[,] board, int x, int y)
+        {
+            if ((int)board[x, y].Piece.Color != Turn)
+            {
+                if (((Pawn)board[x, y].Piece)._moveAmount == 1)
+                {
+                    board[x, y].Piece = new Space();
+                    ((Square)grid.Children[(x * 8) + y]).Panel.Children.Clear();
+                    ((Square)grid.Children[(x * 8) + y]).Pic = null;
+                }
+            }
+        }
+
+        public void ResetEnPassant()
+        {
+            for (int x = 0; x < 8; ++x)
+            {
+                for (int y = 0; y < 8; ++y)
+                {
+                    if (Board.Squares[x, y].Piece.GetType() == typeof(Pawn))
+                    {
+                        if ((int)Board.Squares[x, y].Piece.Color == Turn)
+                        {
+                            if (((Pawn)Board.Squares[x, y].Piece).chance == true)
+                            {
+                                ((Pawn)Board.Squares[x, y].Piece).chance = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
         
         #region Properties
-        /// <summary>
-        /// Command Length of 2.
-        /// </summary>
-        public int Piece_Length { get { return PIECE_LENGTH; } }
         /// <summary>
         /// Represents the chess board.
         /// </summary>
@@ -980,7 +1704,6 @@ namespace Chess.ChessControl
         /// Represents the current Player's turn.
         /// </summary>
         public int Turn { get {return _turn; } private set {_turn = value; } }
-        public bool HasWon { get; set; }
         #endregion
         //-----------------------------------------------------------------------------------
     }

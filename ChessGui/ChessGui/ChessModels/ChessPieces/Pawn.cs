@@ -6,7 +6,7 @@ namespace Chess.ChessModels
     public class Pawn : ChessPiece
     {
         private int _moves;
-        private int _moveAmount;
+        public int _moveAmount;
         public bool chance = false;
 
         public Pawn(ChessColor color)
@@ -24,6 +24,7 @@ namespace Chess.ChessModels
         }
         public override void MovePiece(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {
+            _moveAmount++;
             board[endX, endY].Piece = board[startX, startY].Piece;
             board[startX, startY].Piece = new Space();
         }
@@ -237,7 +238,7 @@ namespace Chess.ChessModels
         {
             bool canMove = false;
             
-            if (board[row, column].Piece.GetType() == typeof(Pawn))
+            if (board[row, column].Piece is Pawn)
             {
                 if (board[row, column].Piece.Color != Color && board[row, column].Piece.Color != ChessColor.NONE)
                 {
@@ -245,7 +246,7 @@ namespace Chess.ChessModels
                     {
                         if (((Pawn)board[row, column].Piece)._moves == 2)
                         {
-                            if(((Pawn)board[row, column].Piece).chance == true)
+                            if (((Pawn)board[row, column].Piece).chance == true)
                             {
                                 canMove = true;
                             }
@@ -262,6 +263,75 @@ namespace Chess.ChessModels
         public override void ResetMovement()
         {
             canMove = new bool[] { true, true, true, true, true, true, true, true};
+        }
+        public List<int[]> Attacks(ChessSquare[,] board, int startX, int startY)
+        {
+            ResetMovement();
+            List<int[]> available = new List<int[]>();
+            bool isAvailable = false;
+            if (Color == ChessColor.DARK)
+            {
+                if (startX + 1 < 8 && startY - 1 >= 0)//down Left 1
+                {
+                    if (board[startX + 1, startY - 1].Piece.Color != Color)
+                    {
+                        isAvailable = IsAvailable(board, startX + 1, startY - 1, 1);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[1] == true)
+                            {
+                                available.Add(new int[] { startX + 1, startY - 1 });
+                            }
+                        }
+                    }
+                }
+                if (startX + 1 < 8 && startY + 1 < 8)//down right 1
+                {
+                    if (board[startX + 1, startY + 1].Piece.Color != Color)
+                    {
+                        isAvailable = IsAvailable(board, startX + 1, startY + 1, 2);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[2] == true)
+                            {
+                                available.Add(new int[] { startX + 1, startY + 1 });
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (startX - 1 >= 0 && startY - 1 >= 0)//up left 1
+                {
+                    if (board[startX - 1, startY - 1].Piece.Color != Color)
+                    {
+                        isAvailable = IsAvailable(board, startX - 1, startY - 1, 4);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[4] == true)
+                            {
+                                available.Add(new int[] { startX - 1, startY - 1 });
+                            }
+                        }
+                    }
+                }
+                if (startX - 1 >= 0 && startY + 1 < 8)//up right 1
+                {
+                    if (board[startX - 1, startY + 1].Piece.Color != Color)
+                    {
+                        isAvailable = IsAvailable(board, startX - 1, startY + 1, 5);
+                        if (isAvailable == true)
+                        {
+                            if (canMove[5] == true)
+                            {
+                                available.Add(new int[] { startX - 1, startY + 1 });
+                            }
+                        }
+                    }
+                }
+            }
+            return available;
         }
         public override List<int[]> Search(ChessSquare[,] board, int startX, int startY, int endX, int endY)
         {

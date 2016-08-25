@@ -88,7 +88,7 @@ namespace Chess.ChessModels
                         available.Add(new int[] { startX, startY + 1 });
                     }
                 }
-                isCastleing = IsPossibleToCastleing(board, startX, isLeft);
+                isCastleing = IsPossibleToCastle(board, startX, isLeft);
                 if (isCastleing == true)
                 {
                     available.Add(new int[] { startX, startY + 2 });
@@ -138,7 +138,7 @@ namespace Chess.ChessModels
                     }
                 }
                 isLeft = true;
-                isCastleing = IsPossibleToCastleing(board, startX, isLeft);
+                isCastleing = IsPossibleToCastle(board, startX, isLeft);
                 if (isCastleing == true)
                 {
                     available.Add(new int[] { startX, startY - 2 });
@@ -159,7 +159,7 @@ namespace Chess.ChessModels
             }
             return canMove;
         }
-        public bool IsPossibleToCastleing(ChessSquare[,] board, int x, bool isLeft)
+        public bool IsPossibleToCastle(ChessSquare[,] board, int x, bool isLeft)
         {
             bool isPossible = false;
             bool leftCastle = false;

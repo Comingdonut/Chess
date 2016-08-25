@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessGui"
         mc:Ignorable="d"
-        Title="Chess" Height="525" Width="725">
+        Title="Chess" Height="525" Width="725"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
     <StackPanel Background="LightYellow">
 
         <Grid>
