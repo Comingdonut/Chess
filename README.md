@@ -26,7 +26,7 @@ their turn until the threat is removed.
 4. If the King is in "Check" and cannot remove "Check" in any legal way, then the player who's King is in "Check" loses.
 This is "Checkmate". "Checkmate" causes the game to end.
 
-### Special Conditions
+#### Special Conditions
 Specific pieces can move in special ways under the right circumstance. These special movements are called "Castleing" and "En Passant".
 "Pawn Promotion" is a special conditional in which a player's Pawn reaches the opponent's 
 side of the board and has an opportunity to promote to a stronger piece.
