@@ -43,11 +43,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\Managers\PieceManager.cs" />
+    <Compile Include="Models\Board\Board.cs" />
+    <Compile Include="Models\Board\BoardSpace.cs" />
+    <Compile Include="Models\Board\BoardValuePair.cs" />
+    <Compile Include="Controllers\Managers\GameManager.cs" />
+    <Compile Include="Controllers\Managers\MovementManager.cs" />
+    <Compile Include="Models\Helper\ChessPiece.cs" />
+    <Compile Include="Models\Helper\Color.cs" />
+    <Compile Include="Models\Helper\Piece.cs" />
+    <Compile Include="Models\Pieces\Bishop.cs" />
+    <Compile Include="Models\Pieces\King.cs" />
+    <Compile Include="Models\Pieces\Knight.cs" />
+    <Compile Include="Models\Pieces\Pawn.cs" />
+    <Compile Include="Models\Pieces\Queen.cs" />
+    <Compile Include="Models\Pieces\Rook.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
