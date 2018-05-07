@@ -89,5 +89,45 @@ namespace Chess_Project.Controllers.Managers
                     if (space.Piece.Type == Piece.Pawn && (space.Piece as Pawn).MovedTwice)
                         (space.Piece as Pawn).MovedTwice = false;
         }
+        internal bool ShouldPromote(ChessPiece piece, int new_x)
+        {
+            bool shouldPromote = false;
+            if (piece.Type == Piece.Pawn)
+            {
+                if (piece.Paint == Color.black)
+                {
+                    if (new_x == 7)
+                        shouldPromote = true;
+                }
+                else
+                {
+                    if (new_x == 0)
+                        shouldPromote = true;
+                }
+            }
+            return shouldPromote;
+        }
+        internal ChessPiece PromotePawn(int option, Color Paint)
+        {
+            ChessPiece piece = null;
+            switch (option)
+            {
+                case 1:
+                    piece = new Knight(Paint);
+                    break;
+                case 2:
+                    piece = new Bishop(Paint);
+                    break;
+                case 3:
+                    piece = new Rook(Paint);
+                    break;
+                case 4:
+                    piece = new Queen(Paint);
+                    break;
+                default:
+                    break;
+            }
+            return piece;
+        }
     }
 }

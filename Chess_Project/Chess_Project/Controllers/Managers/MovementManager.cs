@@ -455,6 +455,13 @@ namespace Chess_Project.Controllers.Managers
             board[x, y].IsEmpty = true;
             board[new_x, new_y].Piece = piece;
             board[new_x, new_y].IsEmpty = false;
+            if (pManager.ShouldPromote(piece, new_x))
+            {
+                // request option here
+                // Check for null value
+                // If null then prompt again
+                // piece = pManager.PromotePawn(option, piece.Paint);
+            }
         }
         #endregion
     }
