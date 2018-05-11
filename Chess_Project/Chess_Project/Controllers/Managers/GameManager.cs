@@ -11,7 +11,7 @@ namespace Chess_Project.Controllers.Managers
         // TODO: Initialize board
         // TODO: Players move opponent's piece
         //      But they could click on a opponent's piece to show their movement.
-        private static GameManager gManager;
+        private static GameManager instance;
 
         private PlayerManager pManager;
         private GameManager()
@@ -20,11 +20,11 @@ namespace Chess_Project.Controllers.Managers
         }
         internal GameManager GetInstance()
         {
-            if(gManager == null)
+            if(instance == null)
             {
-                gManager = new GameManager();
+                instance = new GameManager();
             }
-            return gManager;
+            return instance;
         }
         internal void StartGame()
         {
@@ -39,9 +39,9 @@ namespace Chess_Project.Controllers.Managers
             // - Initialize Board
             //   * Start Loop Game
             //     - PrintBoard
+            //     - Reset pawn moved twice method
             //     - Get Player's King position
             //     - CheckForCheck()
-            //     - Reset pawn moved twice method
             //     - Prompt player for movement
             //       * If space not available then prompt again
             //     - CheckAvailability()

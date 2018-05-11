@@ -10,7 +10,7 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class PlayerManager
     {
-        internal static PlayerManager pManager;
+        internal static PlayerManager instance;
         internal Player Player1 { get; set; }
         internal Player Player2 { get; set; }
         internal PlayerManager()
@@ -20,11 +20,9 @@ namespace Chess_Project.Controllers.Managers
         }
         internal static PlayerManager GetInstance()
         {
-            if(pManager == null)
-            {
-                pManager = new PlayerManager();
-            }
-            return pManager;
+            if(instance == null)
+                instance = new PlayerManager();
+            return instance;
         }
         // Set Player Name
         // Set Player Color

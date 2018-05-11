@@ -8,7 +8,7 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class MovementManager
     {
-        private static MovementManager mManager;
+        private static MovementManager instance;
         private int dir;
         private int piece_x_axis;
         private int piece_y_axis;
@@ -21,11 +21,9 @@ namespace Chess_Project.Controllers.Managers
         }
         internal MovementManager GetInstance()
         {
-            if(mManager == null)
-            {
-                mManager = new MovementManager();
-            }
-            return mManager;
+            if(instance == null)
+                instance = new MovementManager();
+            return instance;
         }
         internal void SetCoordinates(int p_x_axis, int p_y_axis) // When a piece is selected to move
         {
