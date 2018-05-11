@@ -27,6 +27,6 @@ their turn until the threat is removed.
 This is "Checkmate". "Checkmate" causes the game to end.
 
 #### Special Conditions
-Specific pieces can move in special ways under the right circumstance. These special movements are called "Castleing" and "En Passant".
+Specific pieces can move in special ways under the right circumstance. These special movements are called "Castling" and "En Passant".
 "Pawn Promotion" is a special conditional in which a player's Pawn reaches the opponent's 
 side of the board and has an opportunity to promote to a stronger piece.
