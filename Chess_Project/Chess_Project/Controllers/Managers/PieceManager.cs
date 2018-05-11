@@ -12,10 +12,10 @@ namespace Chess_Project.Controllers.Managers
     internal class PieceManager
     {
         private static PieceManager instance = null;
-        KeyValuePair<int, int> currentKing;
+        internal KeyValuePair<int, int> CurrentKing { get; set; }
         private PieceManager()
         {
-            currentKing = new KeyValuePair<int, int>();
+            CurrentKing = new KeyValuePair<int, int>();
         }
         internal static PieceManager GetInstance()
         {
@@ -62,7 +62,7 @@ namespace Chess_Project.Controllers.Managers
         }
         private bool IsCastling(int new_x, int new_y)
         {
-            return new_x == currentKing.Key && new_y == currentKing.Value;
+            return new_x == CurrentKing.Key && new_y == CurrentKing.Value;
         }
         internal void SetEnPassant(ChessPiece piece)
         {
@@ -76,7 +76,7 @@ namespace Chess_Project.Controllers.Managers
                 {
                     if(board[x, y].Piece.Paint == paint && board[x, y].Piece.Type == Piece.King)
                     {
-                        currentKing = new KeyValuePair<int, int>(x, y);
+                        CurrentKing = new KeyValuePair<int, int>(x, y);
                         return;
                     }
                 }

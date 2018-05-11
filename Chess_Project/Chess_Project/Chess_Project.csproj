@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\Managers\PieceManager.cs" />
+    <Compile Include="Controllers\Managers\PlayerManager.cs" />
     <Compile Include="Models\Board\Board.cs" />
     <Compile Include="Models\Board\BoardSpace.cs" />
     <Compile Include="Models\Board\BoardValuePair.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Models\Pieces\Pawn.cs" />
     <Compile Include="Models\Pieces\Queen.cs" />
     <Compile Include="Models\Pieces\Rook.cs" />
+    <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

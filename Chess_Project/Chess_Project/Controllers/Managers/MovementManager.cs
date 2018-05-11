@@ -27,13 +27,13 @@ namespace Chess_Project.Controllers.Managers
             }
             return mManager;
         }
-        internal void SetCoordinates(int p_x_axis, int p_y_axis)
+        internal void SetCoordinates(int p_x_axis, int p_y_axis) // When a piece is selected to move
         {
-            piece_x_axis = p_x_axis;
+            piece_x_axis = p_x_axis; // TODO: handle when x or y is out of bounds (Maybe in Game Manager)
             piece_y_axis = p_y_axis;
         }
         #region Determine Normal Available Movement
-        internal List<BoardValuePair> DeterminePieceMovement(ChessPiece piece)
+        internal List<BoardValuePair> DeterminePieceMovement(ChessPiece piece) // After a piece is selected to move
         {
             List<BoardValuePair> movement = new List<BoardValuePair>();
             SetDirection(piece.Paint);
@@ -81,7 +81,7 @@ namespace Chess_Project.Controllers.Managers
                     movement.Add(DiagonalBottomRight(1));
                     break;
                 default:
-                    // TODO: Handle if no correct type is given
+                    // TODO: Handle if no correct type is given (Maybe prompt again if empty space)
                     break;
             }
             return movement;
@@ -331,7 +331,6 @@ namespace Chess_Project.Controllers.Managers
                 movement.Add(PawnCapture(board, piece.Paint));
                 movement.Add(EnPassant(board, piece.Paint));
             }
-            // Check for King, maybe turn this into a switch statement?
             return movement;
         }
         #endregion
@@ -406,6 +405,57 @@ namespace Chess_Project.Controllers.Managers
             return sMove;
         }
         #endregion
+        #region Check and Checkmate
+        private void CheckForCheck(BoardSpace[,] board) // After Searching for a king but before selecting a piece
+        {
+            List<BoardValuePair> movement = new List<BoardValuePair>();
+            BoardValuePair enemyChecks = new BoardValuePair();
+            int kingX = pManager.CurrentKing.Key;
+            int kingY = pManager.CurrentKing.Value;
+            SetCoordinates(kingX, kingY);
+            movement.Add(VerticalFoward(8));
+            movement.Add(VerticalBackward(8));
+            movement.Add(HorizontalLeft(8));
+            movement.Add(HorizontalRight(8));
+            movement.Add(DiagonalTopLeft(8));
+            movement.Add(DiagonalTopRight(8));
+            movement.Add(DiagonalBottomLeft(8));
+            movement.Add(DiagonalBottomRight(8));
+            movement.Add(KnightMovement());
+            foreach(BoardValuePair group in movement)
+            {
+                foreach(KeyValuePair<int, int> pair in group) // 1. Run a check for queen movement and knight movement on king.
+                {
+                    int enemyX = pair.Key;
+                    int enemyY = pair.Value;
+                    if (board[enemyX, enemyY].Piece.Paint != board[kingX, kingY].Piece.Paint) // 2. Check for enemy piece
+                    {
+                        List<BoardValuePair> eMovement = new List<BoardValuePair>();
+                        SetCoordinates(enemyX, enemyY);
+                        eMovement.AddRange(DeterminePieceMovement(board[enemyX, enemyY].Piece));
+                        eMovement.AddRange(DetermineSpecialMovement(board, board[enemyX, enemyY].Piece));
+
+                        foreach (BoardValuePair eGroup in movement)
+                        {
+                            foreach (KeyValuePair<int, int> ePair in group) // 3. See enemy piece movement
+                            {
+                                if(ePair.Key == kingX && ePair.Value == kingY) // 4. If enemy movement get king
+                                {
+                                    enemyChecks.Add(new KeyValuePair<int, int>(enemyX, enemyY)); // 5. Add enemy && put king in check
+                                    (board[kingX, kingY].Piece as King).InCheck = true; 
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // New method - 
+        //      After Determining piece movement
+        //          Start: Check if number of enemy check is one
+        //              check if any movement removes king from check
+        //                  End: remove any movement that doesn't help remove king from check
+        #endregion
         #region Checking Movement Validity and Moving Pieces
         internal bool CheckAvailablity(List<BoardValuePair> movement, int x, int y)
         {
@@ -425,8 +475,8 @@ namespace Chess_Project.Controllers.Managers
         internal void MovePiece(BoardSpace[,] board, int x, int y, int new_x, int new_y)
         {
             ChessPiece piece = board[x, y].Piece;
-            pManager.FindKing(board, piece.Paint);
-            pManager.ResetMovedTwice(board, piece.Paint);
+            pManager.FindKing(board, piece.Paint); // Here
+            pManager.ResetMovedTwice(board, piece.Paint); // Here
             piece = pManager.HandlePiece(piece, x, new_x, new_y);
             if(piece.Type == Piece.Rook && (piece as Rook).CanCastle)
             {

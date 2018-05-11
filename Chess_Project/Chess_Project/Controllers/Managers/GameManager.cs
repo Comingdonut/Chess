@@ -12,9 +12,11 @@ namespace Chess_Project.Controllers.Managers
         // TODO: Players move opponent's piece
         //      But they could click on a opponent's piece to show their movement.
         private static GameManager gManager;
+
+        private PlayerManager pManager;
         private GameManager()
         {
-
+            pManager = PlayerManager.GetInstance();
         }
         internal GameManager GetInstance()
         {
@@ -23,6 +25,32 @@ namespace Chess_Project.Controllers.Managers
                 gManager = new GameManager();
             }
             return gManager;
+        }
+        internal void StartGame()
+        {
+            // TODO: Main Menu Title
+            // Main Menu options:
+            //  - Start Game
+            //  - Rules
+            //  - Quit
+            // TODO: Start
+            // - Ask for 1st player name
+            // - Ask for 2nd player name
+            // - Initialize Board
+            //   * Start Loop Game
+            //     - PrintBoard
+            //     - Get Player's King position
+            //     - CheckForCheck()
+            //     - Reset pawn moved twice method
+            //     - Prompt player for movement
+            //       * If space not available then prompt again
+            //     - CheckAvailability()
+            //       * If not available then prompt again
+            //     - Move piece
+            //       * Check for pawn promotion
+            //         - Prompt for promotion
+            //           * If null then prompt again
+            //     - Switch Player turn
         }
     }
 }
