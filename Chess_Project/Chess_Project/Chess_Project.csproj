@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Controllers\Managers\PieceManager.cs" />
     <Compile Include="Controllers\Managers\PlayerManager.cs" />
+    <Compile Include="Controllers\Managers\PromptManager.cs" />
     <Compile Include="Models\Board\Board.cs" />
     <Compile Include="Models\Board\BoardSpace.cs" />
     <Compile Include="Models\Board\BoardValuePair.cs" />
