@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chess_Project.Views;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +15,16 @@ namespace Chess_Project.Controllers.Managers
         private static GameManager instance;
 
         private PlayerManager pManager;
+        private PromptManager pmtManager;
+        private Menu menu;
+
         private GameManager()
         {
             pManager = PlayerManager.GetInstance();
+            pmtManager = PromptManager.GetInstance();
+            menu = new Menu();
         }
-        internal GameManager GetInstance()
+        internal static GameManager GetInstance()
         {
             if(instance == null)
             {
@@ -28,11 +34,12 @@ namespace Chess_Project.Controllers.Managers
         }
         internal void StartGame()
         {
-            // TODO: Main Menu Title
-            // Main Menu options:
-            //  - Start Game
-            //  - Rules
-            //  - Quit
+            bool endGame = false;
+            do
+            {
+                int result = pmtManager.PromptForOption(menu.AsciiMenu, menu.MenuOptions);
+                endGame = SelectOption(result);
+            } while (!endGame);
             // TODO: Start
             // - Ask for 1st player name
             // - Ask for 2nd player name
@@ -51,6 +58,42 @@ namespace Chess_Project.Controllers.Managers
             //         - Prompt for promotion
             //           * If null then prompt again
             //     - Switch Player turn
+            // TODO: Rules
+            // - Basic Rules
+            //   * Objective
+            //   * Moves first
+            //   * Check
+            //   * Checkmate
+            // - PieceMovement
+            //   * Pawn / Knight / Bishop / Rook / Queen / King
+            // - Special Conditions
+            //   * En Passant / Castling / Pawn Promotion
+        }
+        internal bool SelectOption(int result)
+        {
+            bool quit = false;
+            pmtManager.ClearConsole();
+            switch (result)
+            {
+                case 1:
+                    PlayGame();
+                    break;
+                case 2:
+                    LookAtRules();
+                    break;
+                case 3:
+                    quit = true;
+                    break;
+            }
+            return quit;
+        }
+        internal void PlayGame()
+        {
+        
+        }
+        internal void LookAtRules()
+        {
+
         }
     }
 }
