@@ -11,7 +11,7 @@ namespace Chess_Project.Controllers.Managers
     {
         private static PromptManager instance;
         private PromptManager() { }
-        internal PromptManager GetInstance()
+        internal static PromptManager GetInstance()
         {
             if(instance == null)
                 instance = new PromptManager();
@@ -21,7 +21,7 @@ namespace Chess_Project.Controllers.Managers
         {
             return Console.ReadLine();
         }
-        internal int promptForOption(string prompt, string[] options)
+        internal int PromptForOption(string prompt, string[] options)
         {
             bool isValid = false;
             int result = 0;
@@ -32,11 +32,14 @@ namespace Chess_Project.Controllers.Managers
                 foreach (string opt in options)
                 {
                     Console.WriteLine(string.Format("{0}) {1}", optionNumber, opt));
+                    optionNumber++;
                 }
                 isValid = int.TryParse(Prompt(), out result);
                 if (isValid)
-                    if(result < 0 || result > options.Count())
+                    if(result < 1 || result > options.Count())
                         isValid = false;
+                if (!isValid)
+                    PrintError("Invalid Option");
             } while (!isValid);
             return result;
         }
@@ -47,19 +50,38 @@ namespace Chess_Project.Controllers.Managers
             bool isValid = false;
             do
             {
-                Console.WriteLine(prompt1);// "What row is the piece you would like on?" || "What row is the space you would like to move on?"
+                Console.WriteLine(prompt1);
                 isValid = int.TryParse(Prompt(), out x);
                 if (isValid && (x >= 0 && x < 8))
                 {
-                    Console.WriteLine(prompt2);// "What column is the piece you would like on?" || "What space is the place you would like to move on?"
+                    Console.WriteLine(prompt2);
                     isValid = int.TryParse(Prompt(), out y);
                     if (y < 0 && y > 7)
                         isValid = false;
+                }
+                if (!isValid)
+                {
+                    PrintError("Invalid Option");
                 }
             } while (!isValid);
             BoardValuePair pieceLocation = new BoardValuePair();
             pieceLocation.AddPair(x, y);
             return pieceLocation;
+        }
+        internal void ClearConsole()
+        {
+            Console.Clear();
+        }
+        internal void Break()
+        {
+            Console.WriteLine("*-----------------------------------------------*");
+        }
+        internal void PrintError(string error)
+        {
+            ClearConsole();
+            Break();
+            Console.WriteLine(error);
+            Break();
         }
     }
 }
