@@ -11,7 +11,7 @@ putting the enemy King in a position where they cannot escape or be saved by oth
 ## Rules
 #### Basic Conditions
 1. The player who controls the white pieces moves first.
-2. When one player is done with their turn, the next player goes next. This continues until a winner is decided.
+2. When one player is done with their turn, the next player goes next. This continues until the end of the game.
 3. A player has to move when it is their turn.
 4. A player can move only once a turn.
 5. Pieces can only move by their respective movements.
@@ -19,7 +19,7 @@ putting the enemy King in a position where they cannot escape or be saved by oth
 
 #### Win Conditions
 1. If it is a player's turn and if moving any piece results in check, then the game ends in draw. This is called "Stalemate".
-2. When the King is threaten with "Capture" but cannot escape or eliminate a piece that threatens it, then the King is in danger.
+2. When the King is threaten with "Capture" but cannot escape or eliminate the piece that threatens it, then the King is in danger.
 This is called "Check"
 3. If the King is in "Check", then the player is required to removed the threat of capture and cannot end 
 their turn until the threat is removed.
