@@ -6,7 +6,7 @@ The board being the field of combat and the pieces being soldiers.
 
 ## Objective
 The objective of the game is not to "Kill" the opponents King but to essentially "Trap" them by
-putting the King in a position where they cannot escape or be saved by other opposing pieces.
+putting the enemy King in a position where they cannot escape or be saved by other opposing pieces.
 
 ## Rules
 #### Basic Conditions
