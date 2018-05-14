@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Chess_Project.Views
 {
-    internal class Rules
+    internal class RulesView
     {
         internal string Title { get; private set; }
         internal string[] RuleOptions { get; private set; }
@@ -29,7 +29,7 @@ namespace Chess_Project.Views
         internal string EnPassant { get; private set; }
         internal string Castling { get; private set; }
         internal string PawnPromotion { get; private set; }
-        internal Rules()
+        internal RulesView()
         {
             Title = "Rules";
             RuleOptions = new string[] { "Basic Rules", "Piece Movement", "Special Conditions", "Back"};

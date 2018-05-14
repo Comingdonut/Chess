@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Chess_Project.Views
 {
-    internal class Menu
+    internal class MenuView
     {
         internal string AsciiMenu { get; private set;  }
         internal string[] MenuOptions { get; private set; }
-        internal Menu()
+        internal MenuView()
         {
             AsciiMenu = "  |_|_|_|  |_|   |_|  |_|_|_|_|    |_|_|_|    |_|_|_|\n"
                       + "|_|        |_|   |_|  |_|        |_|        |_|      \n"
