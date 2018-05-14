@@ -8,5 +8,16 @@ namespace Chess_Project.Views
 {
     internal class Game
     {
+        internal string[] PromptPiece { get; private set; }
+        internal string[] PromptSpace { get; private set; }
+        internal string PawnPromotion { get; private set; }
+        internal string[] PromotionOptions { get; private set; }
+        public Game()
+        {
+            PromptPiece = new string[] { "What row is the piece you would like on?" ,"What column is the piece you would like on?" };
+            PromptSpace = new string[] { "What row is the space you would like to move on?", "What space is the place you would like to move on?" };
+            PawnPromotion = "Select a piece to promote too.";
+            PromotionOptions = new string[] { "Knight", "Bishop", "Rook", "Queen" };
+        }
     }
 }
