@@ -17,12 +17,14 @@ namespace Chess_Project.Controllers.Managers
         private PlayerManager pManager;
         private PromptManager pmtManager;
         private Menu menu;
+        private Rules r;
 
         private GameManager()
         {
             pManager = PlayerManager.GetInstance();
             pmtManager = PromptManager.GetInstance();
             menu = new Menu();
+            r = new Rules();
         }
         internal static GameManager GetInstance()
         {
@@ -58,16 +60,6 @@ namespace Chess_Project.Controllers.Managers
             //         - Prompt for promotion
             //           * If null then prompt again
             //     - Switch Player turn
-            // TODO: Rules
-            // - Basic Rules
-            //   * Objective
-            //   * Moves first
-            //   * Check
-            //   * Checkmate
-            // - PieceMovement
-            //   * Pawn / Knight / Bishop / Rook / Queen / King
-            // - Special Conditions
-            //   * En Passant / Castling / Pawn Promotion
         }
         internal bool SelectOption(int result)
         {
@@ -84,6 +76,8 @@ namespace Chess_Project.Controllers.Managers
                 case 3:
                     quit = true;
                     break;
+                default:
+                    break;
             }
             return quit;
         }
@@ -91,9 +85,75 @@ namespace Chess_Project.Controllers.Managers
         {
         
         }
+        #region Da Rules
         internal void LookAtRules()
         {
-
+            bool back = false;
+            do
+            {
+                pmtManager.Break();
+                int result = pmtManager.PromptForOption(r.Title, r.RuleOptions);
+                back = SelectRules(result);
+            } while (!back);
         }
+        internal bool SelectRules(int result)
+        {
+            bool back = false;
+            pmtManager.ClearConsole();
+            switch (result)
+            {
+                case 1:
+                    BasicRules();
+                    break;
+                case 2:
+                    PieceMovement();
+                    break;
+                case 3:
+                    SpecialConditions();
+                    break;
+                case 4:
+                    back = true;
+                    break;
+            }
+            return back;
+        }
+        internal void BasicRules()
+        {
+            pmtManager.Break();
+            Console.WriteLine(r.RuleOptions[0]);
+            pmtManager.Break();
+            Console.WriteLine(r.Objective);
+            Console.WriteLine(r.MovesFirst);
+            Console.WriteLine(r.TurnTaking);
+            Console.WriteLine(r.Movement);
+            Console.WriteLine(r.StaleMate);
+            Console.WriteLine(r.Check);
+            Console.WriteLine(r.CheckMate);
+            pmtManager.Prompt();
+        }
+        internal void PieceMovement()
+        {
+            pmtManager.Break();
+            Console.WriteLine(r.RuleOptions[1]);
+            pmtManager.Break();
+            Console.WriteLine(r.Pawn);
+            Console.WriteLine(r.Knight);
+            Console.WriteLine(r.Bishop);
+            Console.WriteLine(r.Rook);
+            Console.WriteLine(r.Queen);
+            Console.WriteLine(r.King);
+            pmtManager.Prompt();
+        }
+        internal void SpecialConditions()
+        {
+            pmtManager.Break();
+            Console.WriteLine(r.RuleOptions[2]);
+            pmtManager.Break();
+            Console.WriteLine(r.EnPassant);
+            Console.WriteLine(r.Castling);
+            Console.WriteLine(r.PawnPromotion);
+            pmtManager.Prompt();
+        }
+        #endregion
     }
 }
