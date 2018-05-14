@@ -64,9 +64,9 @@
     <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Views\Game.cs" />
-    <Compile Include="Views\Menu.cs" />
-    <Compile Include="Views\Rules.cs" />
+    <Compile Include="Views\GameView.cs" />
+    <Compile Include="Views\MenuView.cs" />
+    <Compile Include="Views\RulesView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

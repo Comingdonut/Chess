@@ -16,15 +16,16 @@ namespace Chess_Project.Controllers.Managers
 
         private PlayerManager pManager;
         private PromptManager pmtManager;
-        private Menu menu;
-        private Rules r;
+        private MenuView mView;
+        private GameView gView;
+        private RulesView rView;
 
         private GameManager()
         {
-            pManager = PlayerManager.GetInstance();
             pmtManager = PromptManager.GetInstance();
-            menu = new Menu();
-            r = new Rules();
+            mView = new MenuView();
+            gView = new GameView();
+            rView = new RulesView();
         }
         internal static GameManager GetInstance()
         {
@@ -37,9 +38,10 @@ namespace Chess_Project.Controllers.Managers
         internal void StartGame()
         {
             bool endGame = false;
+            pManager = new PlayerManager();
             do
             {
-                int result = pmtManager.PromptForOption(menu.AsciiMenu, menu.MenuOptions);
+                int result = pmtManager.PromptForOption(mView.AsciiMenu, mView.MenuOptions);
                 endGame = SelectOption(result);
             } while (!endGame);
             // TODO: Start
@@ -60,6 +62,7 @@ namespace Chess_Project.Controllers.Managers
             //         - Prompt for promotion
             //           * If null then prompt again
             //     - Switch Player turn
+            // - At end of game
         }
         internal bool SelectOption(int result)
         {
@@ -83,7 +86,12 @@ namespace Chess_Project.Controllers.Managers
         }
         internal void PlayGame()
         {
-        
+            bool gameEnd = false;
+            do
+            {
+                pManager.Player1.Name = pmtManager.PromptForName(gView.PromptName, 1);
+                pManager.Player2.Name = pmtManager.PromptForName(gView.PromptName, 2);
+            } while (!gameEnd);
         }
         #region Da Rules
         internal void LookAtRules()
@@ -92,7 +100,7 @@ namespace Chess_Project.Controllers.Managers
             do
             {
                 pmtManager.Break();
-                int result = pmtManager.PromptForOption(r.Title, r.RuleOptions);
+                int result = pmtManager.PromptForOption(rView.Title, rView.RuleOptions);
                 back = SelectRules(result);
             } while (!back);
         }
@@ -120,38 +128,38 @@ namespace Chess_Project.Controllers.Managers
         internal void BasicRules()
         {
             pmtManager.Break();
-            Console.WriteLine(r.RuleOptions[0]);
+            Console.WriteLine(rView.RuleOptions[0]);
             pmtManager.Break();
-            Console.WriteLine(r.Objective);
-            Console.WriteLine(r.MovesFirst);
-            Console.WriteLine(r.TurnTaking);
-            Console.WriteLine(r.Movement);
-            Console.WriteLine(r.StaleMate);
-            Console.WriteLine(r.Check);
-            Console.WriteLine(r.CheckMate);
+            Console.WriteLine(rView.Objective);
+            Console.WriteLine(rView.MovesFirst);
+            Console.WriteLine(rView.TurnTaking);
+            Console.WriteLine(rView.Movement);
+            Console.WriteLine(rView.StaleMate);
+            Console.WriteLine(rView.Check);
+            Console.WriteLine(rView.CheckMate);
             pmtManager.Prompt();
         }
         internal void PieceMovement()
         {
             pmtManager.Break();
-            Console.WriteLine(r.RuleOptions[1]);
+            Console.WriteLine(rView.RuleOptions[1]);
             pmtManager.Break();
-            Console.WriteLine(r.Pawn);
-            Console.WriteLine(r.Knight);
-            Console.WriteLine(r.Bishop);
-            Console.WriteLine(r.Rook);
-            Console.WriteLine(r.Queen);
-            Console.WriteLine(r.King);
+            Console.WriteLine(rView.Pawn);
+            Console.WriteLine(rView.Knight);
+            Console.WriteLine(rView.Bishop);
+            Console.WriteLine(rView.Rook);
+            Console.WriteLine(rView.Queen);
+            Console.WriteLine(rView.King);
             pmtManager.Prompt();
         }
         internal void SpecialConditions()
         {
             pmtManager.Break();
-            Console.WriteLine(r.RuleOptions[2]);
+            Console.WriteLine(rView.RuleOptions[2]);
             pmtManager.Break();
-            Console.WriteLine(r.EnPassant);
-            Console.WriteLine(r.Castling);
-            Console.WriteLine(r.PawnPromotion);
+            Console.WriteLine(rView.EnPassant);
+            Console.WriteLine(rView.Castling);
+            Console.WriteLine(rView.PawnPromotion);
             pmtManager.Prompt();
         }
         #endregion

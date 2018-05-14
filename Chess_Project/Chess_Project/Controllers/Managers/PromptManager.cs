@@ -43,7 +43,17 @@ namespace Chess_Project.Controllers.Managers
             } while (!isValid);
             return result;
         }
-        internal BoardValuePair Prompt(string prompt1, string prompt2)
+        internal string PromptForName(string prompt, int playerNum)
+        {
+            Console.WriteLine(prompt);
+            string name = Prompt();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = "Player " + playerNum;
+            }
+            return name;
+        }
+        internal BoardValuePair PromptForMovement(string prompt1, string prompt2)
         {
             int x = 0;
             int y = 0;
