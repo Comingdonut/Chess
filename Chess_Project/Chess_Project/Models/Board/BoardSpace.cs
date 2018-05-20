@@ -16,6 +16,10 @@ namespace Chess_Project.Models.Board
         {
             Piece = null;
         }
+        internal BoardSpace(bool IsEmpty)
+        {
+            this.IsEmpty = IsEmpty;
+        }
         internal BoardSpace(ChessPiece Piece)
         {
             this.Piece = Piece;

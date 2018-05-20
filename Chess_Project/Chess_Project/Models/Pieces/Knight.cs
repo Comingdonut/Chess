@@ -15,7 +15,7 @@ namespace Chess_Project.Models.Pieces
         internal Knight() { }
         internal Knight(Color Paint)
         {
-            Letter = 'K';
+            Letter = 'N';
             Type = Piece.Knight;
             this.Paint = Paint;
         }

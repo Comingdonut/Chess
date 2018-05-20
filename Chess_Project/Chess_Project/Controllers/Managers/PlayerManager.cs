@@ -12,19 +12,18 @@ namespace Chess_Project.Controllers.Managers
     {
         internal Player Player1 { get; set; }
         internal Player Player2 { get; set; }
+        internal Player CurrentPlayer { get; set; }
         internal PlayerManager()
         {
             Player1 = new Player("Player 1", Color.white);
             Player2 = new Player("Player 2", Color.black);
         }
-        internal Player SwitchPlayer(Player p)
+        internal void SwitchPlayer()
         {
-            Player currPlayer;
-            if(p.Name == Player1.Name)
-                currPlayer = Player2;
+            if(CurrentPlayer.Name == Player1.Name)
+                CurrentPlayer = Player2;
             else
-                currPlayer = Player1;
-            return currPlayer;
+                CurrentPlayer = Player1;
         }
     }
 }

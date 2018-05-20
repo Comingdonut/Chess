@@ -48,9 +48,7 @@ namespace Chess_Project.Controllers.Managers
             Console.WriteLine(prompt);
             string name = Prompt();
             if (string.IsNullOrWhiteSpace(name))
-            {
                 name = "Player " + playerNum;
-            }
             return name;
         }
         internal BoardValuePair PromptForMovement(string prompt1, string prompt2)
@@ -66,13 +64,13 @@ namespace Chess_Project.Controllers.Managers
                 {
                     Console.WriteLine(prompt2);
                     isValid = int.TryParse(Prompt(), out y);
-                    if (y < 0 && y > 7)
+                    if (y < 0 || y > 7)
                         isValid = false;
                 }
+                else
+                    isValid = false;
                 if (!isValid)
-                {
                     PrintError("Invalid Option");
-                }
             } while (!isValid);
             BoardValuePair pieceLocation = new BoardValuePair();
             pieceLocation.AddPair(x, y);

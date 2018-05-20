@@ -19,7 +19,7 @@ namespace Chess_Project.Controllers.Managers
         {
             pManager = PieceManager.GetInstance();
         }
-        internal MovementManager GetInstance()
+        internal static MovementManager GetInstance()
         {
             if(instance == null)
                 instance = new MovementManager();
@@ -90,6 +90,15 @@ namespace Chess_Project.Controllers.Managers
                 dir = -1;
             dir = 1;
         }
+        internal bool CheckBoundary(int row_column)
+        {
+            bool isValid = false;
+            if (row_column >= B_ZERO && row_column < B_EIGHT)
+            {
+                isValid = true;
+            }
+            return isValid;
+        }
         #endregion
         #region Normal Movement Availablity Checks
         private BoardValuePair VerticalFoward(int amount)
@@ -97,7 +106,7 @@ namespace Chess_Project.Controllers.Managers
             BoardValuePair vMovement = new BoardValuePair();
             for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
             {
-                if (x < B_EIGHT && x >= B_ZERO)
+                if (CheckBoundary(x))
                     vMovement.AddPair(x, piece_y_axis);
                 else
                     break;
@@ -109,7 +118,7 @@ namespace Chess_Project.Controllers.Managers
             BoardValuePair vMovement = new BoardValuePair();
             for (int x = piece_x_axis + (dir * -1); x < (x+amount) * -1; x += (dir * -1))
             {
-                if (x < B_EIGHT && x >= B_ZERO)
+                if (CheckBoundary(x))
                     vMovement.AddPair(x, piece_y_axis);
                 else
                     break;
@@ -121,7 +130,7 @@ namespace Chess_Project.Controllers.Managers
             BoardValuePair hMovement = new BoardValuePair();
             for (int y = (piece_y_axis + dir); y < y + amount; y += dir)
             {
-                if (y < B_EIGHT && y >= B_ZERO)
+                if (CheckBoundary(y))
                     hMovement.AddPair(piece_x_axis, y);
                 else
                     break;
@@ -133,7 +142,7 @@ namespace Chess_Project.Controllers.Managers
             BoardValuePair hMovement = new BoardValuePair();
             for (int y = piece_y_axis + (dir * -1); y < y + amount; y += (dir * -1))
             {
-                if (y < B_EIGHT && y >= B_ZERO)
+                if (CheckBoundary(y))
                     hMovement.AddPair(piece_x_axis, y);
                 else
                     break;
@@ -147,15 +156,15 @@ namespace Chess_Project.Controllers.Managers
         {
             int column = 0;
             BoardValuePair tLMovement = new BoardValuePair();
-            if (piece_y_axis + dir >= B_ZERO && piece_y_axis + dir < B_EIGHT)
+            if (CheckBoundary(piece_y_axis + dir))
                 column = piece_y_axis + dir;
 
             for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
             {
-                if (column + dir >= B_ZERO && column + dir < B_EIGHT)
+                if (CheckBoundary(column + dir))
                 {
                     column += dir;
-                    if (x < B_EIGHT && x >= B_ZERO)
+                    if (CheckBoundary(x))
                         tLMovement.AddPair(x, column);
                     else
                         break;
@@ -172,15 +181,15 @@ namespace Chess_Project.Controllers.Managers
         {
             int column = 0;
             BoardValuePair bRMovement = new BoardValuePair();
-            if (piece_y_axis + (dir * -1) >= B_ZERO && piece_y_axis + (dir * -1) < B_EIGHT)
+            if (CheckBoundary(piece_y_axis + (dir * -1)))
                 column = piece_y_axis + (dir * -1);
 
             for (int x = piece_x_axis + (dir * -1); x < x + amount; x += (dir * -1))
             {
-                if (column + (dir * -1) >= B_ZERO && column + (dir * -1) < B_EIGHT)
+                if (CheckBoundary(column + (dir * -1)))
                 {
                     column += (dir * -1);
-                    if (x < B_EIGHT && x >= B_ZERO)
+                    if (CheckBoundary(x))
                         bRMovement.AddPair(x, column);
                     else
                         break;
@@ -197,16 +206,16 @@ namespace Chess_Project.Controllers.Managers
         {
             int column = 0;
             BoardValuePair tRMovement = new BoardValuePair();
-            if (piece_y_axis - dir >= B_ZERO && piece_y_axis - dir < B_EIGHT)
+            if (CheckBoundary(piece_y_axis - dir))
             {
                 column = piece_y_axis - dir;
             }
             for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
             {
-                if (column - dir >= B_ZERO && column - dir < B_EIGHT)
+                if (CheckBoundary(column - dir))
                 {
                     column -= dir;
-                    if (x < B_EIGHT && x >= B_ZERO)
+                    if (CheckBoundary(x))
                         tRMovement.AddPair(x, column);
                     else
                         break;
@@ -223,15 +232,15 @@ namespace Chess_Project.Controllers.Managers
         {
             int column = 0;
             BoardValuePair bLMovement = new BoardValuePair();
-            if (piece_y_axis - (dir * -1) >= B_ZERO && piece_y_axis - (dir * -1) < B_EIGHT)
+            if (CheckBoundary(piece_y_axis - (dir * -1)))
                 column = piece_y_axis - (dir * -1);
 
             for (int x = piece_x_axis + (dir * -1); x < x + amount; x += (dir * -1))
             {
-                if (column - (dir * -1) >= B_ZERO && column - (dir * -1) < B_EIGHT)
+                if (CheckBoundary(column - (dir * -1)))
                 {
                     column -= (dir * -1);
-                    if (x < B_EIGHT && x >= B_ZERO)
+                    if (CheckBoundary(x))
                         bLMovement.AddPair(x, column);
                     else
                         break;
@@ -253,7 +262,7 @@ namespace Chess_Project.Controllers.Managers
             const int HALF_OF_MOVES = 4; // Knight available moves = 8
             for(int j = 0; j < HALF_OF_MOVES; j++)
             {
-                if ((x + moveX >= B_ZERO && x + moveX < B_EIGHT) && (y + moveY >= B_ZERO && y + moveY < B_EIGHT))
+                if (CheckBoundary(x + moveX) && CheckBoundary(y + moveY))
                 {
                     kMovement.AddPair(x + moveX, y + moveY);
                     moveX *= -1;
@@ -264,7 +273,7 @@ namespace Chess_Project.Controllers.Managers
                         moveY = 1;
                     }
                 }
-                if ((x + moveX2 >= B_ZERO && x + moveX2 < B_EIGHT) && (y + moveY2 >= B_ZERO && y + moveY2 < B_EIGHT))
+                if (CheckBoundary(x + moveX2) && CheckBoundary(y + moveY2))
                 {
                     kMovement.AddPair(x + moveX2, y + moveY2);
                     moveX2 *= -1;

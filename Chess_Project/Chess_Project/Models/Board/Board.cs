@@ -15,16 +15,17 @@ namespace Chess_Project.Models.Board
         {
             GameBoard = new BoardSpace[8, 8];
         }
-        internal static void GetInstance()
+        internal static Board GetInstance()
         {
             if(b == null)
             {
                 b = new Board();
             }
+            return b;
         }
         internal void ResetBoard()
         {
-            GameBoard = new BoardSpace[8, 8]; // Maybe in GameManager
+            GameBoard = new BoardSpace[8, 8];
         }
     }
 }
