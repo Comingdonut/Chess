@@ -53,24 +53,24 @@ namespace Chess_Project.Controllers.Managers
                 int result = pmtManager.PromptForOption(mView.AsciiMenu, mView.MenuOptions);
                 endGame = SelectOption(result);
             } while (!endGame);
-            // TODO: Start
-            // - Ask for 1st player name***
-            // - Ask for 2nd player name***
-            // - Initialize Board***
-            //   * Start Loop Game
-            //     - PrintBoard
+            /// TODO: Start
+            /// - Ask for 1st player name
+            /// - Ask for 2nd player name
+            /// - Initialize Board***
+            ///   * Start Loop Game
+            ///     - PrintBoard
             //     - Reset pawn moved twice method
             //     - Get Player's King position
             //     - CheckForCheck()
-            //     - Prompt player for movement
-            //       * If space not available then prompt again
+            ///     - Prompt player for movement
+            ///       * If space not available then prompt again
             //     - CheckAvailability()
             //       * If not available then prompt again
             //     - Move piece
             //       * Check for pawn promotion
             //         - Prompt for promotion
             //           * If null then prompt again
-            //     - Switch Player turn
+            ///     - Switch Player turn
             // - At end of game
         }
         internal bool SelectOption(int result)
@@ -96,30 +96,45 @@ namespace Chess_Project.Controllers.Managers
         internal void PlayGame()
         {
             bool gameEnd = false;
-            pManager.Player1.Name = pmtManager.PromptForName(gView.PromptName, 1);
+            pManager.Player1.Name = pmtManager.PromptForName(gView.PromptName, 1);// Prompt player names
             pManager.Player2.Name = pmtManager.PromptForName(gView.PromptName, 2);
-            pManager.CurrentPlayer = pManager.Player1;
-            InitBoard(b.GameBoard);
-            do
+            pManager.CurrentPlayer = pManager.Player1;// Sets current player
+            InitBoard(b.GameBoard);// initializes board
+            do// Games Loop
             {
-                gView.printBoard(b.GameBoard);
-                Console.WriteLine(gView.PromptPlayerTurn(pManager.CurrentPlayer));
+                gView.printBoard(b.GameBoard);// Prints Board
+                Console.WriteLine(gView.PromptPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
                 bool isValid = false;
                 do
                 {
-                    BoardValuePair space = pmtManager.PromptForMovement(gView.PromptPiece[0], gView.PromptPiece[1]);
-                    if(!b.GameBoard[space.First().Key, space.First().Value].IsEmpty)
-                        if (b.GameBoard[space.First().Key, space.First().Value].Piece.Paint == pManager.CurrentPlayer.Color)
-                        {
-                            isValid = true;
-                            continue;
-                        }
-                    pmtManager.PrintError(gView.PieceChoiceError);
-                } while (!isValid);
+                    BoardValuePair space = new BoardValuePair();
+                    do// Prompt Loop
+                    {
+                        space = pmtManager.PromptForMovement(gView.PromptPiece[0], gView.PromptPiece[1]);// Prompt for piece to move
+                        if (!b.GameBoard[space.First().Key, space.First().Value].IsEmpty)// Check if not empty TODO: Refactor to space.empty
+                            if (b.GameBoard[space.First().Key, space.First().Value].Piece.Paint == pManager.CurrentPlayer.Color)// Check if color matches player color TODO: Refactor to space.paint
+                            {
+                                isValid = true;
+                                continue;// Skip error print if valid
+                            }
+                        pmtManager.PrintError(gView.PieceChoiceError);
+                    } while (!isValid);
+                    mManager.SetCoordinates(space.First().Key, space.First().Value);// Stores space coordinates to movement manager
+                    isValid = false;// Resets isvalid
+                    BoardValuePair newSpace = pmtManager.PromptForMovement(gView.PromptSpace[0], gView.PromptSpace[1]);// Prompt for space to move piece too
+                    List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space.First().Key, space.First().Value].Piece);
+                    mManager.CheckForPiece(b.GameBoard, movement, pManager.CurrentPlayer.Color);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    if (mManager.CheckAvailablity(movement, newSpace.First().Key, newSpace.First().Value))// Checks if new Space is an movement option
+                    {
+                        isValid = true;
+                        continue;// Skip error print if valid
+                    }
+                    pmtManager.PrintError(gView.PieceMovementError);
+                } while (!isValid);// If new Space is not Valid, do loop again
 
-                pmtManager.Prompt();
+                pmtManager.Prompt(); // Replace this with moving pieces
 
-                pManager.SwitchPlayer();
+                pManager.SwitchPlayer();// Switches player turns
             } while (!gameEnd);
         }
         internal void InitBoard(BoardSpace[,] board)
