@@ -14,6 +14,7 @@ namespace Chess_Project.Views
         internal string[] PromptPiece { get; private set; }
         internal string[] PromptSpace { get; private set; }
         internal string PieceChoiceError { get; set; }
+        internal string PieceMovementError { get; set; }
         internal string PawnPromotion { get; private set; }
         internal string[] PromotionOptions { get; private set; }
         public GameView()
@@ -22,6 +23,7 @@ namespace Chess_Project.Views
             PromptPiece = new string[] { "What row is the piece you would like on?" ,"What column is the piece you would like on?" };
             PromptSpace = new string[] { "What row is the space you would like to move on?", "What space is the place you would like to move on?" };
             PieceChoiceError = "Choose your own Piece!";
+            PieceMovementError = "That space is not available...";
             PawnPromotion = "Select a piece to promote too.";
             PromotionOptions = new string[] { "Knight", "Bishop", "Rook", "Queen" };
         }

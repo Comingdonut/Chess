@@ -14,6 +14,8 @@ namespace Chess_Project.Controllers.Managers
         private int piece_y_axis;
         private const int B_ZERO = 0; // Boundary 2d board
         private const int B_EIGHT = 8;
+        private const int ONE = 1; // Rename to relate movement count
+        private const int SEVEN = 7;
         private PieceManager pManager;
         private MovementManager()
         {
@@ -27,7 +29,7 @@ namespace Chess_Project.Controllers.Managers
         }
         internal void SetCoordinates(int p_x_axis, int p_y_axis) // When a piece is selected to move
         {
-            piece_x_axis = p_x_axis; // TODO: handle when x or y is out of bounds (Maybe in Game Manager)
+            piece_x_axis = p_x_axis;
             piece_y_axis = p_y_axis;
         }
         #region Determine Normal Available Movement
@@ -39,44 +41,44 @@ namespace Chess_Project.Controllers.Managers
             {
                 case Piece.Pawn:
                     if (!(piece as Pawn).HasMoved)
-                        movement.Add(VerticalFoward(2));
+                        movement.Add(VerticalForward(2));
                     else
-                        movement.Add(VerticalFoward(1));
+                        movement.Add(VerticalForward(1)); // Test Has Moved
                     break;
                 case Piece.Knight:
-                    movement.Add(KnightMovement());
+                    //movement.Add(KnightMovement());
                     break;
                 case Piece.Bishop:
-                    movement.Add(DiagonalTopLeft(8));
-                    movement.Add(DiagonalTopRight(8));
-                    movement.Add(DiagonalBottomLeft(8));
-                    movement.Add(DiagonalBottomRight(8));
+                    //movement.Add(DiagonalTopLeft(SEVEN));
+                    //movement.Add(DiagonalTopRight(SEVEN));
+                    //movement.Add(DiagonalBottomLeft(SEVEN));
+                    //movement.Add(DiagonalBottomRight(SEVEN));
                     break;
                 case Piece.Rook:
-                    movement.Add(VerticalFoward(8));
-                    movement.Add(VerticalBackward(8));
-                    movement.Add(HorizontalLeft(8));
-                    movement.Add(HorizontalRight(8));
+                    movement.Add(VerticalForward(SEVEN));
+                    movement.Add(VerticalBackward(SEVEN));
+                    movement.Add(HorizontalLeft(SEVEN));
+                    movement.Add(HorizontalRight(SEVEN));
                     break;
                 case Piece.Queen:
-                    movement.Add(VerticalFoward(8));
-                    movement.Add(VerticalBackward(8));
-                    movement.Add(HorizontalLeft(8));
-                    movement.Add(HorizontalRight(8));
-                    movement.Add(DiagonalTopLeft(8));
-                    movement.Add(DiagonalTopRight(8));
-                    movement.Add(DiagonalBottomLeft(8));
-                    movement.Add(DiagonalBottomRight(8));
+                    //movement.Add(VerticalForward(SEVEN));
+                    //movement.Add(VerticalBackward(SEVEN));
+                    //movement.Add(HorizontalLeft(SEVEN));
+                    //movement.Add(HorizontalRight(SEVEN));
+                    //movement.Add(DiagonalTopLeft(SEVEN));
+                    //movement.Add(DiagonalTopRight(SEVEN));
+                    //movement.Add(DiagonalBottomLeft(SEVEN));
+                    //movement.Add(DiagonalBottomRight(SEVEN));
                     break;
                 case Piece.King:
-                    movement.Add(VerticalFoward(1));
-                    movement.Add(VerticalBackward(1));
-                    movement.Add(HorizontalLeft(1));
-                    movement.Add(HorizontalRight(1));
-                    movement.Add(DiagonalTopLeft(1));
-                    movement.Add(DiagonalTopRight(1));
-                    movement.Add(DiagonalBottomLeft(1));
-                    movement.Add(DiagonalBottomRight(1));
+                    //movement.Add(VerticalForward(ONE));
+                    //movement.Add(VerticalBackward(ONE));
+                    //movement.Add(HorizontalLeft(ONE));
+                    //movement.Add(HorizontalRight(ONE));
+                    //movement.Add(DiagonalTopLeft(ONE));
+                    //movement.Add(DiagonalTopRight(ONE));
+                    //movement.Add(DiagonalBottomLeft(ONE));
+                    //movement.Add(DiagonalBottomRight(ONE));
                     break;
                 default:
                     // TODO: Handle if no correct type is given (Maybe prompt again if empty space)
@@ -86,9 +88,9 @@ namespace Chess_Project.Controllers.Managers
         }
         private void SetDirection(Color paint)
         {
+            dir = 1;
             if(paint == Color.white)
                 dir = -1;
-            dir = 1;
         }
         internal bool CheckBoundary(int row_column)
         {
@@ -101,52 +103,56 @@ namespace Chess_Project.Controllers.Managers
         }
         #endregion
         #region Normal Movement Availablity Checks
-        private BoardValuePair VerticalFoward(int amount)
+        private BoardValuePair VerticalForward(int amount)
         {
             BoardValuePair vMovement = new BoardValuePair();
-            for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
+            int moveCount = amount;
+            int x = piece_x_axis;
+            do
             {
-                if (CheckBoundary(x))
-                    vMovement.AddPair(x, piece_y_axis);
-                else
-                    break;
-            }
+                x += dir;
+                vMovement.AddPair(x, piece_y_axis);
+                moveCount -= ONE;
+            } while (moveCount != 0);
             return vMovement;
         }
         private BoardValuePair VerticalBackward(int amount)
         {
             BoardValuePair vMovement = new BoardValuePair();
-            for (int x = piece_x_axis + (dir * -1); x < (x+amount) * -1; x += (dir * -1))
+            int moveCount = amount;
+            int x = piece_x_axis;
+            do
             {
-                if (CheckBoundary(x))
-                    vMovement.AddPair(x, piece_y_axis);
-                else
-                    break;
-            }
+                x += dir * -(ONE);
+                vMovement.AddPair(x, piece_y_axis);
+                moveCount -= ONE;
+            } while (moveCount != 0);
             return vMovement;
         }
         private BoardValuePair HorizontalLeft(int amount)
         {
             BoardValuePair hMovement = new BoardValuePair();
-            for (int y = (piece_y_axis + dir); y < y + amount; y += dir)
+            int moveCount = amount;
+            int y = piece_y_axis;
+            do
             {
-                if (CheckBoundary(y))
-                    hMovement.AddPair(piece_x_axis, y);
-                else
-                    break;
-            }
+                y += dir;
+                hMovement.AddPair(piece_x_axis, y);
+                moveCount -= ONE;
+            } while (moveCount != 0);
             return hMovement;
         }
         private BoardValuePair HorizontalRight(int amount)
         {
             BoardValuePair hMovement = new BoardValuePair();
-            for (int y = piece_y_axis + (dir * -1); y < y + amount; y += (dir * -1))
+            int moveCount = amount;
+            int y = piece_y_axis;
+            do
             {
-                if (CheckBoundary(y))
-                    hMovement.AddPair(piece_x_axis, y);
-                else
-                    break;
-            }
+                y += dir * -(ONE);
+                hMovement.AddPair(piece_x_axis, y);
+                moveCount -= ONE;
+            } while (moveCount != 0);
             return hMovement;
         }
         //     \
@@ -290,7 +296,7 @@ namespace Chess_Project.Controllers.Managers
         #endregion
         #region Removing Movement
         internal void CheckForPiece(BoardSpace[,] board, List<BoardValuePair> movement, Color paint)
-        {
+         {
             int currMovement = -1; // Current Movement Index and currentPair Index
             int currPair = -1;
             for(int m = 0; m < movement.Count(); m++)
@@ -299,6 +305,12 @@ namespace Chess_Project.Controllers.Managers
                 {
                     int x = movement[m][p].Key;
                     int y = movement[m][p].Value;
+                    if (!CheckBoundary(x) || !CheckBoundary(y))
+                    {
+                        currMovement = m;
+                        currPair = p;
+                        break;
+                    }
                     if (!board[x,y].IsEmpty && (board[x, y].Piece.Paint == paint))
                     {
                         currMovement = m;
@@ -308,15 +320,16 @@ namespace Chess_Project.Controllers.Managers
                     if(!board[x, y].IsEmpty && (board[x, y].Piece.Paint != paint))
                     {
                         currMovement = m;
-                        currPair = p+1;
+                        currPair = p+dir;
                         break;
                     }
                 }
                 if(currPair != -1)
                 {
-                    for(int p = currPair; p < movement[currMovement].Count(); p++)
+                    int count = movement[currMovement].Count;
+                    for (int p = currPair; p < count; p++)
                     {
-                        movement[currMovement].RemoveAt(p);
+                        movement[currMovement].RemoveAt(currPair);
                     }
                     currMovement = -1;
                     currPair = -1;
@@ -420,7 +433,7 @@ namespace Chess_Project.Controllers.Managers
             int kingX = pManager.CurrentKing.Key;
             int kingY = pManager.CurrentKing.Value;
             SetCoordinates(kingX, kingY);
-            movement.Add(VerticalFoward(8));
+            movement.Add(VerticalForward(8));
             movement.Add(VerticalBackward(8));
             movement.Add(HorizontalLeft(8));
             movement.Add(HorizontalRight(8));
