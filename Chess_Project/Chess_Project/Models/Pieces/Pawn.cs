@@ -10,6 +10,7 @@ namespace Chess_Project.Models.Pieces
     internal class Pawn : ChessPiece
     {
         internal override char Letter { get; }
+        internal override int MoveAmount { get; set; }
         internal override Piece Type { get; set; }
         internal override Color Paint { get; set; }
         internal bool HasMoved { get; set; }
@@ -20,6 +21,7 @@ namespace Chess_Project.Models.Pieces
         internal Pawn(Color Paint)
         {
             Letter = 'P';
+            MoveAmount = 2;
             Type = Piece.Pawn;
             this.Paint = Paint;
             HasMoved = false;

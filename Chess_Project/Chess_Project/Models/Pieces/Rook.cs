@@ -10,14 +10,17 @@ namespace Chess_Project.Models.Pieces
     internal class Rook : ChessPiece
     {
         internal override char Letter { get; }
+        internal override int MoveAmount { get; set; }
         internal override Piece Type { get; set; }
         internal override Color Paint { get; set; }
         internal bool HasMoved { get; set; }
         internal bool CanCastle { get; set; }
+
         internal Rook() { }
         internal Rook(Color Paint)
         {
             Letter = 'R';
+            MoveAmount = 7;
             Type = Piece.Rook;
             this.Paint = Paint;
             HasMoved = false;

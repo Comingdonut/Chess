@@ -10,6 +10,7 @@ namespace Chess_Project.Models.Pieces
     internal class King : ChessPiece
     {
         internal override char Letter { get; }
+        internal override int MoveAmount { get; set; }
         internal override Piece Type { get; set; }
         internal override Color Paint { get; set; }
         internal bool HasMoved { get; set; }
@@ -18,6 +19,7 @@ namespace Chess_Project.Models.Pieces
         internal King(Color Paint)
         {
             Letter = 'K';
+            MoveAmount = 1;
             Type = Piece.King;
             this.Paint = Paint;
             InCheck = false;

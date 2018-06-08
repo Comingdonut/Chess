@@ -12,10 +12,9 @@ namespace Chess_Project.Controllers.Managers
         private int dir;
         private int piece_x_axis;
         private int piece_y_axis;
-        private const int B_ZERO = 0; // Boundary 2d board
+        private const int B_ZERO = 0; // Bourd boundary
         private const int B_EIGHT = 8;
-        private const int ONE = 1; // Rename to relate movement count
-        private const int SEVEN = 7;
+        private const int SWITCH_DIR = -1;
         private PieceManager pManager;
         private MovementManager()
         {
@@ -27,58 +26,55 @@ namespace Chess_Project.Controllers.Managers
                 instance = new MovementManager();
             return instance;
         }
-        internal void SetCoordinates(int p_x_axis, int p_y_axis) // When a piece is selected to move
+        internal void SetCoordinates(int p_x_axis, int p_y_axis)
         {
             piece_x_axis = p_x_axis;
             piece_y_axis = p_y_axis;
         }
         #region Determine Normal Available Movement
-        internal List<BoardValuePair> DeterminePieceMovement(ChessPiece piece) // After a piece is selected to move
+        internal List<BoardValuePair> DeterminePieceMovement(ChessPiece piece)
         {
             List<BoardValuePair> movement = new List<BoardValuePair>();
             SetDirection(piece.Paint);
             switch (piece.Type)
             {
                 case Piece.Pawn:
-                    if (!(piece as Pawn).HasMoved)
-                        movement.Add(VerticalForward(2));
-                    else
-                        movement.Add(VerticalForward(1)); // Test Has Moved
+                    movement.Add(VerticalForward(piece.MoveAmount)); // TODO: set moveAmount is equal to 1
                     break;
                 case Piece.Knight:
                     //movement.Add(KnightMovement());
                     break;
                 case Piece.Bishop:
-                    //movement.Add(DiagonalTopLeft(SEVEN));
-                    //movement.Add(DiagonalTopRight(SEVEN));
-                    //movement.Add(DiagonalBottomLeft(SEVEN));
-                    //movement.Add(DiagonalBottomRight(SEVEN));
+                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 case Piece.Rook:
-                    movement.Add(VerticalForward(SEVEN));
-                    movement.Add(VerticalBackward(SEVEN));
-                    movement.Add(HorizontalLeft(SEVEN));
-                    movement.Add(HorizontalRight(SEVEN));
+                    movement.Add(VerticalForward(piece.MoveAmount));
+                    movement.Add(VerticalBackward(piece.MoveAmount));
+                    movement.Add(HorizontalLeft(piece.MoveAmount));
+                    movement.Add(HorizontalRight(piece.MoveAmount));
                     break;
                 case Piece.Queen:
-                    //movement.Add(VerticalForward(SEVEN));
-                    //movement.Add(VerticalBackward(SEVEN));
-                    //movement.Add(HorizontalLeft(SEVEN));
-                    //movement.Add(HorizontalRight(SEVEN));
-                    //movement.Add(DiagonalTopLeft(SEVEN));
-                    //movement.Add(DiagonalTopRight(SEVEN));
-                    //movement.Add(DiagonalBottomLeft(SEVEN));
-                    //movement.Add(DiagonalBottomRight(SEVEN));
+                    movement.Add(VerticalForward(piece.MoveAmount));
+                    movement.Add(VerticalBackward(piece.MoveAmount));
+                    movement.Add(HorizontalLeft(piece.MoveAmount));
+                    movement.Add(HorizontalRight(piece.MoveAmount));
+                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 case Piece.King:
-                    //movement.Add(VerticalForward(ONE));
-                    //movement.Add(VerticalBackward(ONE));
-                    //movement.Add(HorizontalLeft(ONE));
-                    //movement.Add(HorizontalRight(ONE));
-                    //movement.Add(DiagonalTopLeft(ONE));
-                    //movement.Add(DiagonalTopRight(ONE));
-                    //movement.Add(DiagonalBottomLeft(ONE));
-                    //movement.Add(DiagonalBottomRight(ONE));
+                    //movement.Add(VerticalForward(piece.MoveAmount));
+                    //movement.Add(VerticalBackward(piece.MoveAmount));
+                    //movement.Add(HorizontalLeft(piece.MoveAmount));
+                    //movement.Add(HorizontalRight(piece.MoveAmount));
+                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 default:
                     // TODO: Handle if no correct type is given (Maybe prompt again if empty space)
@@ -112,7 +108,7 @@ namespace Chess_Project.Controllers.Managers
             {
                 x += dir;
                 vMovement.AddPair(x, piece_y_axis);
-                moveCount -= ONE;
+                --moveCount;
             } while (moveCount != 0);
             return vMovement;
         }
@@ -123,9 +119,9 @@ namespace Chess_Project.Controllers.Managers
             int x = piece_x_axis;
             do
             {
-                x += dir * -(ONE);
+                x += dir * SWITCH_DIR;
                 vMovement.AddPair(x, piece_y_axis);
-                moveCount -= ONE;
+                --moveCount;
             } while (moveCount != 0);
             return vMovement;
         }
@@ -138,7 +134,7 @@ namespace Chess_Project.Controllers.Managers
             {
                 y += dir;
                 hMovement.AddPair(piece_x_axis, y);
-                moveCount -= ONE;
+                --moveCount;
             } while (moveCount != 0);
             return hMovement;
         }
@@ -149,9 +145,9 @@ namespace Chess_Project.Controllers.Managers
             int y = piece_y_axis;
             do
             {
-                y += dir * -(ONE);
+                y += dir * SWITCH_DIR;
                 hMovement.AddPair(piece_x_axis, y);
-                moveCount -= ONE;
+                --moveCount;
             } while (moveCount != 0);
             return hMovement;
         }

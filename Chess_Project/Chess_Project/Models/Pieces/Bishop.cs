@@ -10,12 +10,14 @@ namespace Chess_Project.Models.Pieces
     internal class Bishop : ChessPiece
     {
         internal override char Letter { get; }
+        internal override int MoveAmount { get; set; }
         internal override Piece Type { get; set; }
         internal override Color Paint { get; set; }
         internal Bishop() { }
         internal Bishop(Color Paint)
         {
             Letter = 'B';
+            MoveAmount = 1;
             Type = Piece.Bishop;
             this.Paint = Paint;
         }

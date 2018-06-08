@@ -10,8 +10,9 @@ namespace Chess_Project.Models.Helper
     internal abstract class ChessPiece
     {
         internal abstract char Letter { get; }
+        internal abstract int MoveAmount { get; set; }
         internal abstract Piece Type { get; set; }
-        internal abstract Color Paint { get; set; } 
+        internal abstract Color Paint { get; set; }
         public override string ToString()
         {
             return (" " + Letter + " ");
