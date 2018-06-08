@@ -42,7 +42,7 @@ namespace Chess_Project.Controllers.Managers
                     movement.Add(VerticalForward(piece.MoveAmount)); // TODO: set moveAmount to equal to 1
                     break;
                 case Piece.Knight:
-                    //movement.Add(KnightMovement());
+                    movement.Add(KnightMovement());
                     break;
                 case Piece.Bishop:
                     movement.Add(DiagonalTopLeft(piece.MoveAmount));
@@ -61,20 +61,20 @@ namespace Chess_Project.Controllers.Managers
                     movement.Add(VerticalBackward(piece.MoveAmount));
                     movement.Add(HorizontalLeft(piece.MoveAmount));
                     movement.Add(HorizontalRight(piece.MoveAmount));
-                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
+                    movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 case Piece.King:
-                    //movement.Add(VerticalForward(piece.MoveAmount));
-                    //movement.Add(VerticalBackward(piece.MoveAmount));
-                    //movement.Add(HorizontalLeft(piece.MoveAmount));
-                    //movement.Add(HorizontalRight(piece.MoveAmount));
-                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
+                    movement.Add(VerticalForward(piece.MoveAmount));
+                    movement.Add(VerticalBackward(piece.MoveAmount));
+                    movement.Add(HorizontalLeft(piece.MoveAmount));
+                    movement.Add(HorizontalRight(piece.MoveAmount));
+                    movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 default:
                     // TODO: Handle if no correct type is given (Maybe prompt again if empty space)
@@ -228,36 +228,14 @@ namespace Chess_Project.Controllers.Managers
             BoardValuePair kMovement = new BoardValuePair();
             int x = piece_x_axis;
             int y = piece_y_axis;
-            int moveX = 1;
-            int moveY = 2;
-            int moveX2 = -1;
-            int moveY2 = 2;
-            const int HALF_OF_MOVES = 4; // Knight available moves = 8
-            for(int j = 0; j < HALF_OF_MOVES; j++)
-            {
-                if (CheckBoundary(x + moveX) && CheckBoundary(y + moveY))
-                {
-                    kMovement.AddPair(x + moveX, y + moveY);
-                    moveX *= -1;
-                    moveY *= -1;
-                    if(j == 2)
-                    {
-                        moveX = 2;
-                        moveY = 1;
-                    }
-                }
-                if (CheckBoundary(x + moveX2) && CheckBoundary(y + moveY2))
-                {
-                    kMovement.AddPair(x + moveX2, y + moveY2);
-                    moveX2 *= -1;
-                    moveY2 *= -1;
-                    if (j == 2)
-                    {
-                        moveX2 = -2;
-                        moveY2 = 1;
-                    }
-                }
-            }
+            kMovement.AddPair(x - 1, y - 2);
+            kMovement.AddPair(x - 2, y - 1);
+            kMovement.AddPair(x - 2, y + 1);
+            kMovement.AddPair(x - 1, y + 2);
+            kMovement.AddPair(x + 1, y + 2);
+            kMovement.AddPair(x + 2, y + 1);
+            kMovement.AddPair(x + 2, y - 1);
+            kMovement.AddPair(x + 1, y - 2);
             return kMovement;
         }
         #endregion
