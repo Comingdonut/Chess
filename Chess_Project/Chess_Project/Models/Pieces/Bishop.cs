@@ -17,7 +17,7 @@ namespace Chess_Project.Models.Pieces
         internal Bishop(Color Paint)
         {
             Letter = 'B';
-            MoveAmount = 1;
+            MoveAmount = 7;
             Type = Piece.Bishop;
             this.Paint = Paint;
         }

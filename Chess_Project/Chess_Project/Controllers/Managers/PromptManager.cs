@@ -67,6 +67,11 @@ namespace Chess_Project.Controllers.Managers
                     if (y < 0 || y > 7)
                         isValid = false;
                 }
+                else if (!isValid)
+                {
+                    x = -1;
+                    isValid = true;
+                }
                 else
                     isValid = false;
                 if (!isValid)
