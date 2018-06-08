@@ -39,16 +39,16 @@ namespace Chess_Project.Controllers.Managers
             switch (piece.Type)
             {
                 case Piece.Pawn:
-                    movement.Add(VerticalForward(piece.MoveAmount)); // TODO: set moveAmount is equal to 1
+                    movement.Add(VerticalForward(piece.MoveAmount)); // TODO: set moveAmount to equal to 1
                     break;
                 case Piece.Knight:
                     //movement.Add(KnightMovement());
                     break;
                 case Piece.Bishop:
-                    //movement.Add(DiagonalTopLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalTopRight(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomLeft(piece.MoveAmount));
-                    //movement.Add(DiagonalBottomRight(piece.MoveAmount));
+                    movement.Add(DiagonalTopLeft(piece.MoveAmount));
+                    movement.Add(DiagonalTopRight(piece.MoveAmount));
+                    movement.Add(DiagonalBottomLeft(piece.MoveAmount));
+                    movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 case Piece.Rook:
                     movement.Add(VerticalForward(piece.MoveAmount));
@@ -156,101 +156,72 @@ namespace Chess_Project.Controllers.Managers
         //      | B |
         private BoardValuePair DiagonalTopLeft(int amount)
         {
-            int column = 0;
-            BoardValuePair tLMovement = new BoardValuePair();
-            if (CheckBoundary(piece_y_axis + dir))
-                column = piece_y_axis + dir;
-
-            for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
+            BoardValuePair movement = new BoardValuePair();
+            int x = piece_x_axis;
+            int y = piece_y_axis;
+            int moveCount = amount;
+            do
             {
-                if (CheckBoundary(column + dir))
-                {
-                    column += dir;
-                    if (CheckBoundary(x))
-                        tLMovement.AddPair(x, column);
-                    else
-                        break;
-                }
-                else
-                    break;
-            }
-            return tLMovement;
+                x += dir;
+                y += dir;
+                movement.AddPair(x, y);
+                --moveCount;
+            } while (moveCount != 0);
+            return movement;
         }
         //  | B |
         //      \
         //       \
         private BoardValuePair DiagonalBottomRight(int amount)
         {
-            int column = 0;
-            BoardValuePair bRMovement = new BoardValuePair();
-            if (CheckBoundary(piece_y_axis + (dir * -1)))
-                column = piece_y_axis + (dir * -1);
-
-            for (int x = piece_x_axis + (dir * -1); x < x + amount; x += (dir * -1))
+            BoardValuePair movement = new BoardValuePair();
+            int x = piece_x_axis;
+            int y = piece_y_axis;
+            int moveCount = amount;
+            do
             {
-                if (CheckBoundary(column + (dir * -1)))
-                {
-                    column += (dir * -1);
-                    if (CheckBoundary(x))
-                        bRMovement.AddPair(x, column);
-                    else
-                        break;
-                }
-                else
-                    break;
-            }
-            return bRMovement;
+                x += dir * SWITCH_DIR;
+                y += dir * SWITCH_DIR;
+                movement.AddPair(x, y);
+                --moveCount;
+            } while (moveCount != 0);
+            return movement;
         }
         //       /
         //      /
         //  | B |
         private BoardValuePair DiagonalTopRight(int amount)
         {
-            int column = 0;
-            BoardValuePair tRMovement = new BoardValuePair();
-            if (CheckBoundary(piece_y_axis - dir))
+            BoardValuePair movement = new BoardValuePair();
+            int x = piece_x_axis;
+            int y = piece_y_axis;
+            int moveCount = amount;
+            do
             {
-                column = piece_y_axis - dir;
-            }
-            for (int x = (piece_x_axis + dir); x < x + amount; x += dir)
-            {
-                if (CheckBoundary(column - dir))
-                {
-                    column -= dir;
-                    if (CheckBoundary(x))
-                        tRMovement.AddPair(x, column);
-                    else
-                        break;
-                }
-                else
-                    break;
-            }
-            return tRMovement;
+                x += dir;
+                y += dir * SWITCH_DIR;
+                movement.AddPair(x, y);
+                --moveCount;
+            } while (moveCount != 0);
+            return movement;
         }
         //     | B |
         //     /
         //    /
         private BoardValuePair DiagonalBottomLeft(int amount)
         {
-            int column = 0;
-            BoardValuePair bLMovement = new BoardValuePair();
-            if (CheckBoundary(piece_y_axis - (dir * -1)))
-                column = piece_y_axis - (dir * -1);
-
-            for (int x = piece_x_axis + (dir * -1); x < x + amount; x += (dir * -1))
+            BoardValuePair movement = new BoardValuePair();
+            int x = piece_x_axis;
+            int y = piece_y_axis;
+            int moveCount = amount;
+            do
             {
-                if (CheckBoundary(column - (dir * -1)))
-                {
-                    column -= (dir * -1);
-                    if (CheckBoundary(x))
-                        bLMovement.AddPair(x, column);
-                    else
-                        break;
-                }
-                else
-                    break;
-            }
-            return bLMovement;
+                x += dir * SWITCH_DIR;
+                y += dir;
+                movement.AddPair(x, y);
+                --moveCount;
+            } while (moveCount != 0);
+            return movement;
         }
         private BoardValuePair KnightMovement()
         {
@@ -478,11 +449,14 @@ namespace Chess_Project.Controllers.Managers
             bool available = false;
             foreach(BoardValuePair pairList in movement)
             {
-                foreach(KeyValuePair<int, int> pair in pairList)
+                if (pairList.Count != 0)
                 {
-                    if(pair.Key == x && pair.Value == y)
+                    foreach (KeyValuePair<int, int> pair in pairList)
                     {
-                        available = true;
+                        if (pair.Key == x && pair.Value == y)
+                        {
+                            available = true;
+                        }
                     }
                 }
             }
