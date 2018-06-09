@@ -111,31 +111,35 @@ namespace Chess_Project.Controllers.Managers
                     do// Prompt Loop
                     {
                         space = pmtManager.PromptForMovement(gView.PromptPiece[0], gView.PromptPiece[1]);// Prompt for piece to move
-                        if(space[0].Key != -1)
+                        if (space[0].Key != -1)
+                        {
                             if (!b.GameBoard[space[0].Key, space[0].Value].IsEmpty)// Check if not empty TODO: Refactor to space.empty
+                            {
                                 if (b.GameBoard[space[0].Key, space[0].Value].Piece.Paint == pManager.CurrentPlayer.Color)// Check if color matches player color TODO: Refactor to space.paint
                                 {
                                     isValid = true;
                                     continue;// Skip error print if valid
                                 }
+                            }
+                        }
                         pmtManager.PrintError(gView.PieceChoiceError);
                         gView.printBoard(b.GameBoard);// Prints Board
                     } while (!isValid);
-                    mManager.SetCoordinates(space.First().Key, space.First().Value);// Stores space coordinates to movement manager
+                    mManager.SetCoordinates(space[0].Key, space[0].Value);// Stores space coordinates to movement manager
                     isValid = false;// Resets isvalid
                     BoardValuePair newSpace = pmtManager.PromptForMovement(gView.PromptSpace[0], gView.PromptSpace[1]);// Prompt for space to move piece too
-                    List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space[0].Key, space[0].Value].Piece);
-                    mManager.CheckForPiece(b.GameBoard, movement, pManager.CurrentPlayer.Color);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space[0].Key, space[0].Value].Piece);// Add normal movement
+                    mManager.CheckForPiece(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    movement.AddRange(mManager.DetermineSpecialMovement(b.GameBoard, b.GameBoard[space[0].Key, space[0].Value].Piece));// Add special movement
                     if (mManager.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
                     {
                         isValid = true;
+                        mManager.MovePiece(b.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
                         continue;// Skip error print if valid
                     }
                     pmtManager.PrintError(gView.PieceMovementError);
                 } while (!isValid);// If new Space is not Valid, do loop again
-
-                pmtManager.Prompt(); // Replace this with moving pieces
-
+                pmtManager.ClearConsole();
                 pManager.SwitchPlayer();// Switches player turns
             } while (!gameEnd);
         }

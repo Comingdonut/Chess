@@ -65,7 +65,14 @@ namespace Chess_Project.Controllers.Managers
                     Console.WriteLine(prompt2);
                     isValid = int.TryParse(Prompt(), out y);
                     if (y < 0 || y > 7)
+                    {
                         isValid = false;
+                    }
+                    else if (!isValid)
+                    {
+                        x = -1;
+                        isValid = true;
+                    }
                 }
                 else if (!isValid)
                 {

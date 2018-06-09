@@ -31,9 +31,15 @@ namespace Chess_Project.Controllers.Managers
             {
                 case Piece.Pawn:
                     // TODO: Add a way for Pawn Promotion to Occur
-                    (piece as Pawn).HasMoved = true;
+                    if (!(piece as Pawn).HasMoved)
+                    {
+                        piece.MoveAmount = 1;
+                        (piece as Pawn).HasMoved = true;
+                    }
                     if (PawnMovedTwice(x, new_x))
+                    {
                         (piece as Pawn).MovedTwice = true;
+                    }
                     break;
                 case Piece.Rook:
                     (piece as Rook).HasMoved = true;
@@ -64,20 +70,19 @@ namespace Chess_Project.Controllers.Managers
         {
             return new_x == CurrentKing.Key && new_y == CurrentKing.Value;
         }
-        internal void SetEnPassant(ChessPiece piece)
-        {
-            (piece as Pawn).CanEnPassant = true;
-        }
         internal void FindKing(BoardSpace[,] board, Color paint)
         {
             for (int x = 0; x < board.GetLength(0); x++)
             {
                 for (int y = 0; y < board.GetLength(1); y++)
                 {
-                    if(board[x, y].Piece.Paint == paint && board[x, y].Piece.Type == Piece.King)
+                    if(board[x, y].Piece != null)
                     {
-                        CurrentKing = new KeyValuePair<int, int>(x, y);
-                        return;
+                        if (board[x, y].Piece.Paint == paint && board[x, y].Piece.Type == Piece.King)
+                        {
+                            CurrentKing = new KeyValuePair<int, int>(x, y);
+                            return;
+                        }
                     }
                 }
             }
@@ -85,9 +90,15 @@ namespace Chess_Project.Controllers.Managers
         internal void ResetMovedTwice(BoardSpace[,] board, Color paint)
         {
             foreach(BoardSpace space in board)
+            {
                 if (!space.IsEmpty && space.Piece.Paint == paint)
+                {
                     if (space.Piece.Type == Piece.Pawn && (space.Piece as Pawn).MovedTwice)
+                    {
                         (space.Piece as Pawn).MovedTwice = false;
+                    }
+                }
+            }
         }
         internal bool ShouldPromote(ChessPiece piece, int new_x)
         {

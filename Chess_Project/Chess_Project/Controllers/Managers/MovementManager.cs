@@ -12,7 +12,7 @@ namespace Chess_Project.Controllers.Managers
         private int dir;
         private int piece_x_axis;
         private int piece_y_axis;
-        private const int B_ZERO = 0; // Bourd boundary
+        private const int B_ZERO = 0; // Board boundary
         private const int B_EIGHT = 8;
         private const int SWITCH_DIR = -1;
         private PieceManager pManager;
@@ -39,7 +39,7 @@ namespace Chess_Project.Controllers.Managers
             switch (piece.Type)
             {
                 case Piece.Pawn:
-                    movement.Add(VerticalForward(piece.MoveAmount)); // TODO: set moveAmount to equal to 1
+                    movement.Add(VerticalForward(piece.MoveAmount));
                     break;
                 case Piece.Knight:
                     movement.Add(KnightMovement());
@@ -240,29 +240,38 @@ namespace Chess_Project.Controllers.Managers
         }
         #endregion
         #region Removing Movement
-        internal void CheckForPiece(BoardSpace[,] board, List<BoardValuePair> movement, Color paint)
+        internal void CheckForPiece(BoardSpace[,] board, List<BoardValuePair> movement, ChessPiece piece)
          {
             int currMovement = -1; // Current Movement Index and currentPair Index
             int currPair = -1;
+            BoardValuePair knightRestrictions = new BoardValuePair();
             for(int m = 0; m < movement.Count(); m++)
             {
                 for (int p = 0; p < movement[m].Count(); p++)
                 {
                     int x = movement[m][p].Key;
                     int y = movement[m][p].Value;
-                    if (!CheckBoundary(x) || !CheckBoundary(y))
+                    if (piece.Type == Piece.Knight)
+                    {
+                        if(!CheckBoundary(x) || !CheckBoundary(y) || (!board[x, y].IsEmpty && board[x, y].Piece.Paint == piece.Paint))
+                        {
+                            knightRestrictions.AddPair(x, y);
+                        }
+                    }
+                    else if (!CheckBoundary(x) || !CheckBoundary(y))
                     {
                         currMovement = m;
                         currPair = p;
                         break;
                     }
-                    if (!board[x,y].IsEmpty && (board[x, y].Piece.Paint == paint))
+                    else if (!board[x,y].IsEmpty && (board[x, y].Piece.Paint == piece.Paint) ||
+                        !board[x, y].IsEmpty && (board[x, y].Piece.Paint != piece.Paint) && piece.Type == Piece.Pawn) //Pawn can't move on enemy piece
                     {
                         currMovement = m;
                         currPair = p;
                         break;
                     }
-                    if(!board[x, y].IsEmpty && (board[x, y].Piece.Paint != paint))
+                    else if(!board[x, y].IsEmpty && (board[x, y].Piece.Paint != piece.Paint))
                     {
                         currMovement = m;
                         currPair = p+dir;
@@ -279,6 +288,21 @@ namespace Chess_Project.Controllers.Managers
                     currMovement = -1;
                     currPair = -1;
                 }
+                if (knightRestrictions.Count() != 0)
+                {
+                    for (int x = 0; x < knightRestrictions.Count(); x++)
+                    {
+                        int count = movement[m].Count-1;
+                        for (int p = count; p > -1; p--)
+                        {
+                            if (knightRestrictions[x].Key == movement[m][p].Key && knightRestrictions[x].Value == movement[m][p].Value)
+                            {
+                                movement[m].RemoveAt(p);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         #endregion
@@ -291,9 +315,9 @@ namespace Chess_Project.Controllers.Managers
             {
                 movement.Add(Castling(board, piece.Paint));
             }
-            if (piece.Type == Piece.Pawn)
+            else if (piece.Type == Piece.Pawn)
             {
-                movement.Add(PawnCapture(board, piece.Paint));
+                movement.Add(PawnCapture(board, piece.Paint)); 
                 movement.Add(EnPassant(board, piece.Paint));
             }
             return movement;
@@ -313,6 +337,10 @@ namespace Chess_Project.Controllers.Managers
                 {
                     int x = sMovement[m][p].Key;
                     int y = sMovement[m][p].Value;
+                    if (!CheckBoundary(x) || !CheckBoundary(y))
+                    {
+                        break;
+                    }
                     if (!board[x, y].IsEmpty && (board[x, y].Piece.Paint == paint))
                     {
                         if (board[x, y].Piece.Type == Piece.King && !(board[x, y].Piece as King).HasMoved)
@@ -337,6 +365,10 @@ namespace Chess_Project.Controllers.Managers
                 {
                     int x = sMovement[m][p].Key;
                     int y = sMovement[m][p].Value;
+                    if (!CheckBoundary(x) || !CheckBoundary(y))
+                    {
+                        break;
+                    }
                     if (!board[x, y].IsEmpty && (board[x, y].Piece.Paint != paint))
                     {
                         sMove.AddPair(x, y);
@@ -357,12 +389,16 @@ namespace Chess_Project.Controllers.Managers
                 {
                     int x = sMovement[m][p].Key;
                     int y = sMovement[m][p].Value;
+                    if (!CheckBoundary(x) || !CheckBoundary(y))
+                    {
+                        break;
+                    }
                     if (!board[x, y].IsEmpty && (board[x, y].Piece.Paint != paint))
                     {
                         if (board[x, y].Piece.Type == Piece.Pawn && (board[x, y].Piece as Pawn).MovedTwice) // Maybe this into its own method
                         {
                             sMove.AddPair(x + dir, y);
-                            pManager.SetEnPassant(board[piece_x_axis, piece_y_axis].Piece);
+                            (board[piece_x_axis, piece_y_axis].Piece as Pawn).CanEnPassant = true;
                         }
                     }
                 }
@@ -443,34 +479,35 @@ namespace Chess_Project.Controllers.Managers
         internal void MovePiece(BoardSpace[,] board, int x, int y, int new_x, int new_y)
         {
             ChessPiece piece = board[x, y].Piece;
-            pManager.FindKing(board, piece.Paint); // Here
-            pManager.ResetMovedTwice(board, piece.Paint); // Here
+            pManager.ResetMovedTwice(board, piece.Paint);
+            pManager.FindKing(board, piece.Paint);
             piece = pManager.HandlePiece(piece, x, new_x, new_y);
             if(piece.Type == Piece.Rook && (piece as Rook).CanCastle)
             {
+                // Activate en passant by moving rook over ally king
+                // Don't need to reset kings space because will be replaced by rook
                 ChessPiece king = board[new_x, new_y].Piece;
-                if (y == 0) // Move right for black, Move left for right
+                board[new_x, new_y] = new BoardSpace(true);
+                if (y == 0) // Move right for black, Move left for white// TODO: Look at this logic again
                 {
                     board[new_x, new_y - 2].Piece = king;
                     board[new_x, new_y - 2].IsEmpty = false;
-                    x--;
+                    new_y--;
                 }
                 else if(y == 7) // Vise Versa
                 {
                     board[new_x, new_y + 2].Piece = king;
                     board[new_x, new_y + 2].IsEmpty = false;
-                    x++;
+                    new_y++;
                 }
                 (piece as Rook).CanCastle = false;
             }
             else if(piece.Type == Piece.Pawn && (piece as Pawn).CanEnPassant)
             {
-                board[new_x-dir, new_y].Piece = null;
-                board[new_x-dir, new_y].IsEmpty = true;
+                board[new_x - dir, new_y] = new BoardSpace(true);
                 (piece as Pawn).CanEnPassant = false;
             }
-            board[x, y].Piece = null;
-            board[x, y].IsEmpty = true;
+            board[x, y] = new BoardSpace(true);
             board[new_x, new_y].Piece = piece;
             board[new_x, new_y].IsEmpty = false;
             if (pManager.ShouldPromote(piece, new_x))
