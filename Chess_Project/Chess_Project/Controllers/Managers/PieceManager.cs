@@ -30,11 +30,14 @@ namespace Chess_Project.Controllers.Managers
             switch (piece.Type)
             {
                 case Piece.Pawn:
-                    // TODO: Add a way for Pawn Promotion to Occur
                     if (!(piece as Pawn).HasMoved)
                     {
                         piece.MoveAmount = 1;
                         (piece as Pawn).HasMoved = true;
+                    }
+                    if (PawnPromotion(piece.Paint, new_x))
+                    {
+                        (piece as Pawn).Promote = true;
                     }
                     if (PawnMovedTwice(x, new_x))
                     {
@@ -65,6 +68,10 @@ namespace Chess_Project.Controllers.Managers
         private bool PawnMovedTwice(int x, int new_x)
         {
             return Math.Abs(new_x - x) == 2;
+        }
+        private bool PawnPromotion(Color paint, int new_x)
+        {
+            return (paint == Color.black && new_x == 7) || (paint == Color.white && new_x == 0);
         }
         private bool IsCastling(int new_x, int new_y)
         {
@@ -99,24 +106,6 @@ namespace Chess_Project.Controllers.Managers
                     }
                 }
             }
-        }
-        internal bool ShouldPromote(ChessPiece piece, int new_x)
-        {
-            bool shouldPromote = false;
-            if (piece.Type == Piece.Pawn)
-            {
-                if (piece.Paint == Color.black)
-                {
-                    if (new_x == 7)
-                        shouldPromote = true;
-                }
-                else
-                {
-                    if (new_x == 0)
-                        shouldPromote = true;
-                }
-            }
-            return shouldPromote;
         }
         internal ChessPiece PromotePawn(int option, Color Paint)
         {

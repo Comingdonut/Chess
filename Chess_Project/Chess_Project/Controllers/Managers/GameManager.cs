@@ -103,9 +103,12 @@ namespace Chess_Project.Controllers.Managers
             do// Games Loop
             {
                 bool isValid = false;
+                bool inCheck = mManager.CheckForCheck(b.GameBoard, pManager.CurrentPlayer.Color);
                 do
                 {
                     gView.printBoard(b.GameBoard);// Prints Board
+                    if (inCheck)
+                        Console.WriteLine(gView.InCheck);
                     Console.WriteLine(gView.PromptPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
                     BoardValuePair space = new BoardValuePair();
                     do// Prompt Loop
@@ -113,7 +116,7 @@ namespace Chess_Project.Controllers.Managers
                         space = pmtManager.PromptForMovement(gView.PromptPiece[0], gView.PromptPiece[1]);// Prompt for piece to move
                         if (space[0].Key != -1)
                         {
-                            if (!b.GameBoard[space[0].Key, space[0].Value].IsEmpty)// Check if not empty TODO: Refactor to space.empty
+                            if (!b.GameBoard[space[0].Key, space[0].Value].IsEmpty)// Check if not empty
                             {
                                 if (b.GameBoard[space[0].Key, space[0].Value].Piece.Paint == pManager.CurrentPlayer.Color)// Check if color matches player color TODO: Refactor to space.paint
                                 {
@@ -124,12 +127,14 @@ namespace Chess_Project.Controllers.Managers
                         }
                         pmtManager.PrintError(gView.PieceChoiceError);
                         gView.printBoard(b.GameBoard);// Prints Board
+                        if (inCheck)
+                            Console.WriteLine(gView.InCheck);
                     } while (!isValid);
                     mManager.SetCoordinates(space[0].Key, space[0].Value);// Stores space coordinates to movement manager
                     isValid = false;// Resets isvalid
                     BoardValuePair newSpace = pmtManager.PromptForMovement(gView.PromptSpace[0], gView.PromptSpace[1]);// Prompt for space to move piece too
                     List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space[0].Key, space[0].Value].Piece);// Add normal movement
-                    mManager.CheckForPiece(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    mManager.RemoveMovement(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
                     movement.AddRange(mManager.DetermineSpecialMovement(b.GameBoard, b.GameBoard[space[0].Key, space[0].Value].Piece));// Add special movement
                     if (mManager.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
                     {
@@ -158,7 +163,7 @@ namespace Chess_Project.Controllers.Managers
             board[1, 0] = new BoardSpace(new Pawn(Color.black));
             board[1, 1] = new BoardSpace(new Pawn(Color.black));
             board[1, 2] = new BoardSpace(new Pawn(Color.black));
-            board[1, 3] = new BoardSpace(new Pawn(Color.black));
+            board[1, 3] = new BoardSpace(new Rook(Color.black));//new Pawn(Color.black));
             board[1, 4] = new BoardSpace(new Pawn(Color.black));
             board[1, 5] = new BoardSpace(new Pawn(Color.black));
             board[1, 6] = new BoardSpace(new Pawn(Color.black));
@@ -184,7 +189,7 @@ namespace Chess_Project.Controllers.Managers
             board[6, 0] = new BoardSpace(new Pawn(Color.white));
             board[6, 1] = new BoardSpace(new Pawn(Color.white));
             board[6, 2] = new BoardSpace(new Pawn(Color.white));
-            board[6, 3] = new BoardSpace(new Pawn(Color.white));
+            board[6, 3] = new BoardSpace(true);// new BoardSpace(new Pawn(Color.white));
             board[6, 4] = new BoardSpace(new Pawn(Color.white));
             board[6, 5] = new BoardSpace(new Pawn(Color.white));
             board[6, 6] = new BoardSpace(new Pawn(Color.white));

@@ -82,7 +82,10 @@ namespace Chess_Project.Controllers.Managers
                 else
                     isValid = false;
                 if (!isValid)
-                    PrintError("Invalid Option");
+                {
+                    x = -1;
+                    isValid = true;
+                }
             } while (!isValid);
             BoardValuePair pieceLocation = new BoardValuePair();
             pieceLocation.AddPair(x, y);
