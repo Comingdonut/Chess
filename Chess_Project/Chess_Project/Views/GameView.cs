@@ -17,6 +17,8 @@ namespace Chess_Project.Views
         internal string PieceMovementError { get; set; }
         internal string PawnPromotion { get; private set; }
         internal string[] PromotionOptions { get; private set; }
+        internal string AlmostCheck { get; set; }
+        internal string StillInCheck { get; set; }
         internal string InCheck { get; set; }
         public GameView()
         {
@@ -27,6 +29,8 @@ namespace Chess_Project.Views
             PieceMovementError = "That space is not available...";
             PawnPromotion = "Select a piece to promote too:";
             PromotionOptions = new string[] { "Knight", "Bishop", "Rook", "Queen" };
+            AlmostCheck = "***Can't move piece, King will be in Check.***";
+            StillInCheck = "****Take your King out of Check!****";
             InCheck = "*****King is in Check!!!*****";
         }
 

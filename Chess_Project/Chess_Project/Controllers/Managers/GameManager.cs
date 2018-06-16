@@ -12,9 +12,6 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class GameManager
     {
-        // TODO: Initialize board
-        // TODO: Players move opponent's piece
-        //      But they could click on a opponent's piece to show their movement.
         private static GameManager instance;
         // Controllers
         private PlayerManager pManager;
@@ -53,25 +50,7 @@ namespace Chess_Project.Controllers.Managers
                 int result = pmtManager.PromptForOption(mView.AsciiMenu, mView.MenuOptions);
                 endGame = SelectOption(result);
             } while (!endGame);
-            /// TODO: Start
-            /// - Ask for 1st player name
-            /// - Ask for 2nd player name
-            /// - Initialize Board***
-            ///   * Start Loop Game
-            ///     - PrintBoard
-            //     - Reset pawn moved twice method
-            //     - Get Player's King position
-            //     - CheckForCheck()
-            ///     - Prompt player for movement
-            ///       * If space not available then prompt again
-            //     - CheckAvailability()
-            //       * If not available then prompt again
-            //     - Move piece
-            //       * Check for pawn promotion
-            //         - Prompt for promotion
-            //           * If null then prompt again
-            ///     - Switch Player turn
-            // - At end of game
+            // TODO: Check for CheckMate
         }
         internal bool SelectOption(int result)
         {
@@ -108,7 +87,9 @@ namespace Chess_Project.Controllers.Managers
                 {
                     gView.printBoard(b.GameBoard);// Prints Board
                     if (inCheck)
+                    {
                         Console.WriteLine(gView.InCheck);
+                    }
                     Console.WriteLine(gView.PromptPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
                     BoardValuePair space = new BoardValuePair();
                     do// Prompt Loop
@@ -138,9 +119,19 @@ namespace Chess_Project.Controllers.Managers
                     movement.AddRange(mManager.DetermineSpecialMovement(b.GameBoard, b.GameBoard[space[0].Key, space[0].Value].Piece));// Add special movement
                     if (mManager.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
                     {
-                        isValid = true;
-                        mManager.MovePiece(b.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
-                        continue;// Skip error print if valid
+                        if(!mManager.CheckForCheck(b.GameBoard, pManager.CurrentPlayer.Color, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value)) // Check if moving piece puts king in check
+                        {
+                            isValid = true;
+                            mManager.MovePiece(b.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
+                            continue;// Skip error print if valid
+                        }
+                        if (inCheck)
+                        {
+                            pmtManager.PrintError(gView.StillInCheck);
+                            continue;
+                        }
+                        pmtManager.PrintError(gView.AlmostCheck);
+                        continue;
                     }
                     pmtManager.PrintError(gView.PieceMovementError);
                 } while (!isValid);// If new Space is not Valid, do loop again
@@ -163,7 +154,7 @@ namespace Chess_Project.Controllers.Managers
             board[1, 0] = new BoardSpace(new Pawn(Color.black));
             board[1, 1] = new BoardSpace(new Pawn(Color.black));
             board[1, 2] = new BoardSpace(new Pawn(Color.black));
-            board[1, 3] = new BoardSpace(new Rook(Color.black));//new Pawn(Color.black));
+            board[1, 3] = new BoardSpace(new Pawn(Color.black));
             board[1, 4] = new BoardSpace(new Pawn(Color.black));
             board[1, 5] = new BoardSpace(new Pawn(Color.black));
             board[1, 6] = new BoardSpace(new Pawn(Color.black));
@@ -189,7 +180,7 @@ namespace Chess_Project.Controllers.Managers
             board[6, 0] = new BoardSpace(new Pawn(Color.white));
             board[6, 1] = new BoardSpace(new Pawn(Color.white));
             board[6, 2] = new BoardSpace(new Pawn(Color.white));
-            board[6, 3] = new BoardSpace(true);// new BoardSpace(new Pawn(Color.white));
+            board[6, 3] = new BoardSpace(new Pawn(Color.white));
             board[6, 4] = new BoardSpace(new Pawn(Color.white));
             board[6, 5] = new BoardSpace(new Pawn(Color.white));
             board[6, 6] = new BoardSpace(new Pawn(Color.white));

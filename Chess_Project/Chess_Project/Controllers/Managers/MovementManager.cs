@@ -462,11 +462,33 @@ namespace Chess_Project.Controllers.Managers
             }
             return false;
         }
-        // New method - 
-        //      After Determining piece movement
-        //          Start: Check if number of enemy check is one
-        //              check if any movement removes king from check
-        //                  End: remove any movement that doesn't help remove king from check
+        public bool CheckForCheck(BoardSpace[,] board, Color paint, int x, int y, int new_x, int new_y)
+        {
+            ChessPiece piece = board[x, y].Piece;
+            ChessPiece newPiece = null;
+            if (!board[new_x, new_y].IsEmpty)
+            {
+                newPiece = board[new_x, new_y].Piece;
+            }
+            board[x, y] = new BoardSpace(true);
+            board[new_x, new_y].Piece = piece;
+            board[new_x, new_y].IsEmpty = false;
+
+            bool inCheck = CheckForCheck(board, paint);
+
+            board[x, y].Piece = piece;
+            board[x, y].IsEmpty = false;
+            if (newPiece != null)
+            {
+                board[new_x, new_y].Piece = newPiece;
+                board[new_x, new_y].IsEmpty = false;
+            }
+            else
+            {
+                board[new_x, new_y] = new BoardSpace(true);
+            }
+            return inCheck;
+        }
         #endregion
         #region Checking Movement Validity and Moving Pieces
         internal bool CheckAvailablity(List<BoardValuePair> movement, int x, int y)
