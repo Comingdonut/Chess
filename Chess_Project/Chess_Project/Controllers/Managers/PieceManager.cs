@@ -93,6 +93,7 @@ namespace Chess_Project.Controllers.Managers
                     }
                 }
             }
+            CurrentKing = new KeyValuePair<int, int>(-1, -1);
         }
         internal void ResetMovedTwice(BoardSpace[,] board, Color paint)
         {

@@ -50,7 +50,6 @@ namespace Chess_Project.Controllers.Managers
                 int result = pmtManager.PromptForOption(mView.AsciiMenu, mView.MenuOptions);
                 endGame = SelectOption(result);
             } while (!endGame);
-            // TODO: Check for CheckMate
         }
         internal bool SelectOption(int result)
         {
@@ -82,7 +81,13 @@ namespace Chess_Project.Controllers.Managers
             do// Games Loop
             {
                 bool isValid = false;
-                bool inCheck = mManager.CheckForCheck(b.GameBoard, pManager.CurrentPlayer.Color);
+                bool inCheck = mManager.Check(b.GameBoard, pManager.CurrentPlayer.Color);
+                if (mManager.CheckMate(b.GameBoard, pManager.CurrentPlayer.Color))
+                {
+                    pManager.SwitchPlayer();
+                    gameEnd = true;
+                    continue;
+                }
                 do
                 {
                     gView.printBoard(b.GameBoard);// Prints Board
@@ -90,7 +95,7 @@ namespace Chess_Project.Controllers.Managers
                     {
                         Console.WriteLine(gView.InCheck);
                     }
-                    Console.WriteLine(gView.PromptPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
+                    Console.WriteLine(gView.PrintPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
                     BoardValuePair space = new BoardValuePair();
                     do// Prompt Loop
                     {
@@ -109,17 +114,19 @@ namespace Chess_Project.Controllers.Managers
                         pmtManager.PrintError(gView.PieceChoiceError);
                         gView.printBoard(b.GameBoard);// Prints Board
                         if (inCheck)
+                        {
                             Console.WriteLine(gView.InCheck);
+                        }
                     } while (!isValid);
                     mManager.SetCoordinates(space[0].Key, space[0].Value);// Stores space coordinates to movement manager
                     isValid = false;// Resets isvalid
                     BoardValuePair newSpace = pmtManager.PromptForMovement(gView.PromptSpace[0], gView.PromptSpace[1]);// Prompt for space to move piece too
                     List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space[0].Key, space[0].Value].Piece);// Add normal movement
-                    mManager.RemoveMovement(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    mManager.RemoveInvalidMovement(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
                     movement.AddRange(mManager.DetermineSpecialMovement(b.GameBoard, b.GameBoard[space[0].Key, space[0].Value].Piece));// Add special movement
                     if (mManager.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
                     {
-                        if(!mManager.CheckForCheck(b.GameBoard, pManager.CurrentPlayer.Color, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value)) // Check if moving piece puts king in check
+                        if(!mManager.Check(b.GameBoard, pManager.CurrentPlayer.Color, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value)) // Check if moving piece puts king in check
                         {
                             isValid = true;
                             mManager.MovePiece(b.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
@@ -138,6 +145,11 @@ namespace Chess_Project.Controllers.Managers
                 pmtManager.ClearConsole();
                 pManager.SwitchPlayer();// Switches player turns
             } while (!gameEnd);
+            pmtManager.Break();
+            Console.WriteLine(gView.PrintWinner(pManager.CurrentPlayer.Name));
+            pmtManager.Break();
+            pmtManager.Prompt();
+            pmtManager.ClearConsole();
         }
         internal void InitBoard(BoardSpace[,] board)
         {

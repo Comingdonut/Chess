@@ -55,9 +55,13 @@ namespace Chess_Project.Views
         {
             Console.BackgroundColor = color;
         }
-        internal string PromptPlayerTurn(Player p)
+        internal string PrintPlayerTurn(Player p)
         {
             return String.Format("It's {0} Turn!", p.Name);
+        }
+        internal string PrintWinner(string name)
+        {
+            return String.Format("A winner is you, {0}!!!", name);
         }
     }
 }
