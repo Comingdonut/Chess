@@ -8,6 +8,10 @@ The board being the field of combat and the pieces being soldiers.
 The objective of the game is not to "Kill" the opponents King but to essentially "Trap" them by
 putting the enemy King in a position where they cannot escape or be saved by other opposing pieces.
 
+Menu: https://user-images.githubusercontent.com/17203401/41510509-09f68640-7223-11e8-817f-310a858a217a.PNG
+
+Board: https://user-images.githubusercontent.com/17203401/41510508-09dee1de-7223-11e8-975c-9d494246b638.PNG
+
 ## Rules
 #### Basic Conditions
 1. The player who controls the white pieces moves first.
