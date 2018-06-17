@@ -11,7 +11,7 @@ namespace Chess_Project
     {
         internal static void Main(string[] args)
         {
-            GameManager chess = GameManager.GetInstance();
+            GameManager chess = new GameManager();
             chess.StartGame();
         }
     }

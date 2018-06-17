@@ -9,7 +9,6 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class MovementManager
     {
-        private static MovementManager instance;
         private int dir;
         private int piece_x_axis;
         private int piece_y_axis;
@@ -17,15 +16,9 @@ namespace Chess_Project.Controllers.Managers
         private const int B_EIGHT = 8;
         private const int SWITCH_DIR = -1;
         private PieceManager pManager;
-        private MovementManager()
+        internal MovementManager()
         {
-            pManager = PieceManager.GetInstance();
-        }
-        internal static MovementManager GetInstance()
-        {
-            if(instance == null)
-                instance = new MovementManager();
-            return instance;
+            pManager = new PieceManager();
         }
         internal void SetCoordinates(int p_x_axis, int p_y_axis)
         {
@@ -78,7 +71,6 @@ namespace Chess_Project.Controllers.Managers
                     movement.Add(DiagonalBottomRight(piece.MoveAmount));
                     break;
                 default:
-                    // TODO: Handle if no correct type is given (Maybe prompt again if empty space)
                     break;
             }
             return movement;
@@ -314,7 +306,7 @@ namespace Chess_Project.Controllers.Managers
             SetDirection(piece.Paint);
             if (piece.Type == Piece.Rook && !(piece as Rook).HasMoved)
             {
-                movement.Add(Castling(board, piece.Paint)); // Test this again
+                movement.Add(Castling(board, piece.Paint));
             }
             else if (piece.Type == Piece.Pawn)
             {
@@ -325,7 +317,7 @@ namespace Chess_Project.Controllers.Managers
         }
         #endregion
         #region Special Movement Availablity Checks
-        // TODO: Document that choosing to land on king will castle
+        // Document that choosing to land on king will castle
         private BoardValuePair Castling(BoardSpace[,] board, Color paint)
         {
             List<BoardValuePair> sMovement = new List<BoardValuePair>();

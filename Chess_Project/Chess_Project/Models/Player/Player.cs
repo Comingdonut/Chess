@@ -11,8 +11,8 @@ namespace Chess_Project.Models.Player
     {
         internal string Name { get; set; }
         internal Color Color { get; set; }
-        // TODO: Time took
-        // TODO: History
+        // TODO: Time History
+        // TODO: Move History
         internal Player() { }
         internal Player(string name, Color color)
         {

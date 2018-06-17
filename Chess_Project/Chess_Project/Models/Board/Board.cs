@@ -9,19 +9,10 @@ namespace Chess_Project.Models.Board
 {
     internal class Board
     {
-        private static Board b;
         internal BoardSpace[,] GameBoard { get; set; }
-        private Board()
+        internal Board()
         {
             GameBoard = new BoardSpace[8, 8];
-        }
-        internal static Board GetInstance()
-        {
-            if(b == null)
-            {
-                b = new Board();
-            }
-            return b;
         }
         internal void ResetBoard()
         {

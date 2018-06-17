@@ -64,10 +64,10 @@ namespace Chess_Project.Views
             // Special Conditions
             EnPassant = "EN PASSANT - When a PAWN moves two spaces forward and an enemy PAWN is directyly\n"
                 + "to the left or right. The enemy PAWN can move diagnolly in front of the pawn to CAPTURE it.";
-            Castling  = "Castling - If a ROOK can move next to it's KING and the KING and ROOK have not yet\n"
+            Castling  = "CASTLING - If a ROOK can move next to it's KING and the KING and ROOK have not yet\n"
                 + "moved, then the ROOK can move next to the KING and the KING can move to the other side of\n"
                 + " the ROOK.";
-            PawnPromotion  = "Pawn Promotion - If a PAWN reaches the enemy side of the board,\n"
+            PawnPromotion  = "PAWN PROMOTION - If a PAWN reaches the enemy side of the board,\n"
                 + "then the PAWN can be promoted to any piece that is not a KING or a PAWN.";
         }
     }

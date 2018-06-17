@@ -11,19 +11,10 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class PieceManager
     {
-        private static PieceManager instance = null;
         internal KeyValuePair<int, int> CurrentKing { get; set; }
-        private PieceManager()
+        internal PieceManager()
         {
             CurrentKing = new KeyValuePair<int, int>();
-        }
-        internal static PieceManager GetInstance()
-        {
-            if(instance == null)
-            {
-                instance = new PieceManager();
-            }
-            return instance;
         }
         internal ChessPiece HandlePiece(ChessPiece piece, int x, int new_x, int new_y)
         {
@@ -53,14 +44,8 @@ namespace Chess_Project.Controllers.Managers
                     break;
                 case Piece.King:
                     (piece as King).HasMoved = true;
-                    // Check for check || Checkmate
-                    // Check for new space or current space to remove king from check
-                    //      Move king
-                    //      Capture Enemy with king
-                    //      Move Piece in front of king
-                    //  `   Capture Enemy ally piece
                     break;
-                default: // Do nothing
+                default:
                     break;
             }
             return piece;

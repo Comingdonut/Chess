@@ -12,49 +12,40 @@ namespace Chess_Project.Controllers.Managers
 {
     internal class GameManager
     {
-        private static GameManager instance;
         // Controllers
-        private PlayerManager pManager;
-        private PromptManager pmtManager;
-        private MovementManager mManager;
+        private PlayerManager playerC;
+        private PromptManager promptC;
+        private MovementManager moveC;
         // Models
-        private Board b;
+        private Board board;
         // Views
-        private MenuView mView;
-        private GameView gView;
-        private RulesView rView;
+        private MenuView menuV;
+        private GameView gameV;
+        private RulesView rulesV;
 
-        private GameManager()
+        internal GameManager()
         {
-            pmtManager = PromptManager.GetInstance();
-            mManager = MovementManager.GetInstance();
-            b = Board.GetInstance();
-            mView = new MenuView();
-            gView = new GameView();
-            rView = new RulesView();
-        }
-        internal static GameManager GetInstance()
-        {
-            if(instance == null)
-            {
-                instance = new GameManager();
-            }
-            return instance;
+            promptC = PromptManager.GetInstance();
+            moveC = new MovementManager();
+            board = new Board();
+            menuV = new MenuView();
+            gameV = new GameView();
+            rulesV = new RulesView();
         }
         internal void StartGame()
         {
             bool endGame = false;
-            pManager = new PlayerManager();
+            playerC = new PlayerManager();
             do
             {
-                int result = pmtManager.PromptForOption(mView.AsciiMenu, mView.MenuOptions);
+                int result = promptC.PromptForOption(menuV.AsciiMenu, menuV.MenuOptions);
                 endGame = SelectOption(result);
             } while (!endGame);
         }
         internal bool SelectOption(int result)
         {
             bool quit = false;
-            pmtManager.ClearConsole();
+            promptC.ClearConsole();
             switch (result)
             {
                 case 1:
@@ -71,89 +62,92 @@ namespace Chess_Project.Controllers.Managers
             }
             return quit;
         }
+        #region Da Game
         internal void PlayGame()
         {
             bool gameEnd = false;
-            pManager.Player1.Name = pmtManager.PromptForName(gView.PromptName, 1);// Prompt player names
-            pManager.Player2.Name = pmtManager.PromptForName(gView.PromptName, 2);
-            pManager.CurrentPlayer = pManager.Player1;// Sets current player
-            InitBoard(b.GameBoard);// initializes board
+            playerC.Player1.Name = promptC.PromptForName(gameV.PromptName, 1);// Prompt player names
+            playerC.Player2.Name = promptC.PromptForName(gameV.PromptName, 2);
+            playerC.CurrentP = playerC.Player1;// Sets current player
+            InitBoard(board.GameBoard);// initializes board
             do// Games Loop
             {
                 bool isValid = false;
-                bool inCheck = mManager.Check(b.GameBoard, pManager.CurrentPlayer.Color);
-                if (mManager.CheckMate(b.GameBoard, pManager.CurrentPlayer.Color))
+                bool inCheck = moveC.Check(board.GameBoard, playerC.CurrentP.Color);
+                if (moveC.CheckMate(board.GameBoard, playerC.CurrentP.Color))
                 {
-                    pManager.SwitchPlayer();
+                    playerC.SwitchPlayer();
                     gameEnd = true;
                     continue;
                 }
                 do
                 {
-                    gView.printBoard(b.GameBoard);// Prints Board
+                    gameV.PrintBoard(board.GameBoard);// Prints Board
                     if (inCheck)
                     {
-                        Console.WriteLine(gView.InCheck);
+                        Console.WriteLine(gameV.InCheck);
                     }
-                    Console.WriteLine(gView.PrintPlayerTurn(pManager.CurrentPlayer));// Prompt Player Turn
+                    Console.WriteLine(gameV.PrintPlayerTurn(playerC.CurrentP));// Prompt Player Turn
                     BoardValuePair space = new BoardValuePair();
+                    BoardSpace currentSpace = new BoardSpace();
                     do// Prompt Loop
                     {
-                        space = pmtManager.PromptForMovement(gView.PromptPiece[0], gView.PromptPiece[1]);// Prompt for piece to move
+                        space = promptC.PromptForMovement(gameV.PromptPiece[0], gameV.PromptPiece[1]);// Prompt for piece to move
+                        currentSpace = board.GameBoard[space[0].Key, space[0].Value];
                         if (space[0].Key != -1)
                         {
-                            if (!b.GameBoard[space[0].Key, space[0].Value].IsEmpty)// Check if not empty
+                            if (!currentSpace.IsEmpty)// Check if not empty
                             {
-                                if (b.GameBoard[space[0].Key, space[0].Value].Piece.Paint == pManager.CurrentPlayer.Color)// Check if color matches player color TODO: Refactor to space.paint
+                                if (currentSpace.Piece.Paint == playerC.CurrentP.Color)// Check if color matches player color
                                 {
                                     isValid = true;
                                     continue;// Skip error print if valid
                                 }
                             }
                         }
-                        pmtManager.PrintError(gView.PieceChoiceError);
-                        gView.printBoard(b.GameBoard);// Prints Board
+                        promptC.PrintError(gameV.PieceChoiceError);
+                        gameV.PrintBoard(board.GameBoard);// Prints Board
                         if (inCheck)
                         {
-                            Console.WriteLine(gView.InCheck);
+                            Console.WriteLine(gameV.InCheck);
                         }
                     } while (!isValid);
-                    mManager.SetCoordinates(space[0].Key, space[0].Value);// Stores space coordinates to movement manager
-                    isValid = false;// Resets isvalid
-                    BoardValuePair newSpace = pmtManager.PromptForMovement(gView.PromptSpace[0], gView.PromptSpace[1]);// Prompt for space to move piece too
-                    List<BoardValuePair> movement = mManager.DeterminePieceMovement(b.GameBoard[space[0].Key, space[0].Value].Piece);// Add normal movement
-                    mManager.RemoveInvalidMovement(b.GameBoard, movement, b.GameBoard[space[0].Key, space[0].Value].Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
-                    movement.AddRange(mManager.DetermineSpecialMovement(b.GameBoard, b.GameBoard[space[0].Key, space[0].Value].Piece));// Add special movement
-                    if (mManager.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
+                    moveC.SetCoordinates(space[0].Key, space[0].Value);// Stores space coordinates to movement manager
+                    isValid = false; // Resets boolean
+                    BoardValuePair newSpace = promptC.PromptForMovement(gameV.PromptSpace[0], gameV.PromptSpace[1]);// Prompt for space to move piece too
+                    List<BoardValuePair> movement = moveC.DeterminePieceMovement(currentSpace.Piece);// Add normal movement
+                    moveC.RemoveInvalidMovement(board.GameBoard, movement, currentSpace.Piece);// Checks for ally and enemy piece and boundaries. Restricts movement if space has ally or enemy or is beyond boundaries.
+                    movement.AddRange(moveC.DetermineSpecialMovement(board.GameBoard, currentSpace.Piece));// Add special movement
+                    if (moveC.CheckAvailablity(movement, newSpace[0].Key, newSpace[0].Value))// Checks if new Space is an movement option
                     {
-                        if(!mManager.Check(b.GameBoard, pManager.CurrentPlayer.Color, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value)) // Check if moving piece puts king in check
+                        if(!moveC.Check(board.GameBoard, playerC.CurrentP.Color, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value)) // Check if moving piece puts king in check
                         {
                             isValid = true;
-                            mManager.MovePiece(b.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
+                            moveC.MovePiece(board.GameBoard, space[0].Key, space[0].Value, newSpace[0].Key, newSpace[0].Value);
                             continue;// Skip error print if valid
                         }
                         if (inCheck)
                         {
-                            pmtManager.PrintError(gView.StillInCheck);
+                            promptC.PrintError(gameV.StillInCheck);
                             continue;
                         }
-                        pmtManager.PrintError(gView.AlmostCheck);
+                        promptC.PrintError(gameV.AlmostCheck);
                         continue;
                     }
-                    pmtManager.PrintError(gView.PieceMovementError);
+                    promptC.PrintError(gameV.PieceMovementError);
                 } while (!isValid);// If new Space is not Valid, do loop again
-                pmtManager.ClearConsole();
-                pManager.SwitchPlayer();// Switches player turns
+                promptC.ClearConsole();
+                playerC.SwitchPlayer();// Switches player turns
             } while (!gameEnd);
-            pmtManager.Break();
-            Console.WriteLine(gView.PrintWinner(pManager.CurrentPlayer.Name));
-            pmtManager.Break();
-            pmtManager.Prompt();
-            pmtManager.ClearConsole();
+            promptC.Break();
+            Console.WriteLine(gameV.PrintWinner(playerC.CurrentP.Name));
+            promptC.Break();
+            promptC.Prompt();
+            promptC.ClearConsole();
+            board.ResetBoard();
         }
         internal void InitBoard(BoardSpace[,] board)
         {
-            // TODO: Optional(Replace initalization with a text file?)
             board[0, 0] = new BoardSpace(new Rook(Color.black));
             board[0, 1] = new BoardSpace(new Knight(Color.black));
             board[0, 2] = new BoardSpace(new Bishop(Color.black));
@@ -198,22 +192,22 @@ namespace Chess_Project.Controllers.Managers
             board[6, 6] = new BoardSpace(new Pawn(Color.white));
             board[6, 7] = new BoardSpace(new Pawn(Color.white));
         }
-        
+        #endregion
         #region Da Rules
         internal void LookAtRules()
         {
             bool back = false;
             do
             {
-                pmtManager.Break();
-                int result = pmtManager.PromptForOption(rView.Title, rView.RuleOptions);
+                promptC.Break();
+                int result = promptC.PromptForOption(rulesV.Title, rulesV.RuleOptions);
                 back = SelectRules(result);
             } while (!back);
         }
         internal bool SelectRules(int result)
         {
             bool back = false;
-            pmtManager.ClearConsole();
+            promptC.ClearConsole();
             switch (result)
             {
                 case 1:
@@ -233,40 +227,40 @@ namespace Chess_Project.Controllers.Managers
         }
         internal void BasicRules()
         {
-            pmtManager.Break();
-            Console.WriteLine(rView.RuleOptions[0]);
-            pmtManager.Break();
-            Console.WriteLine(rView.Objective);
-            Console.WriteLine(rView.MovesFirst);
-            Console.WriteLine(rView.TurnTaking);
-            Console.WriteLine(rView.Movement);
-            Console.WriteLine(rView.StaleMate);
-            Console.WriteLine(rView.Check);
-            Console.WriteLine(rView.CheckMate);
-            pmtManager.Prompt();
+            promptC.Break();
+            Console.WriteLine(rulesV.RuleOptions[0]);
+            promptC.Break();
+            Console.WriteLine(rulesV.Objective);
+            Console.WriteLine(rulesV.MovesFirst);
+            Console.WriteLine(rulesV.TurnTaking);
+            Console.WriteLine(rulesV.Movement);
+            Console.WriteLine(rulesV.StaleMate);
+            Console.WriteLine(rulesV.Check);
+            Console.WriteLine(rulesV.CheckMate);
+            promptC.Prompt();
         }
         internal void PieceMovement()
         {
-            pmtManager.Break();
-            Console.WriteLine(rView.RuleOptions[1]);
-            pmtManager.Break();
-            Console.WriteLine(rView.Pawn);
-            Console.WriteLine(rView.Knight);
-            Console.WriteLine(rView.Bishop);
-            Console.WriteLine(rView.Rook);
-            Console.WriteLine(rView.Queen);
-            Console.WriteLine(rView.King);
-            pmtManager.Prompt();
+            promptC.Break();
+            Console.WriteLine(rulesV.RuleOptions[1]);
+            promptC.Break();
+            Console.WriteLine(rulesV.Pawn);
+            Console.WriteLine(rulesV.Knight);
+            Console.WriteLine(rulesV.Bishop);
+            Console.WriteLine(rulesV.Rook);
+            Console.WriteLine(rulesV.Queen);
+            Console.WriteLine(rulesV.King);
+            promptC.Prompt();
         }
         internal void SpecialConditions()
         {
-            pmtManager.Break();
-            Console.WriteLine(rView.RuleOptions[2]);
-            pmtManager.Break();
-            Console.WriteLine(rView.EnPassant);
-            Console.WriteLine(rView.Castling);
-            Console.WriteLine(rView.PawnPromotion);
-            pmtManager.Prompt();
+            promptC.Break();
+            Console.WriteLine(rulesV.RuleOptions[2]);
+            promptC.Break();
+            Console.WriteLine(rulesV.EnPassant);
+            Console.WriteLine(rulesV.Castling);
+            Console.WriteLine(rulesV.PawnPromotion);
+            promptC.Prompt();
         }
         #endregion
     }

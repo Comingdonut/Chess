@@ -23,18 +23,17 @@ namespace Chess_Project.Views
         public GameView()
         {
             PromptName = "What is your name?";
-            PromptPiece = new string[] { "What row is the piece you would like on?" ,"What column is the piece you would like on?" };
+            PromptPiece = new string[] { "What row is the Piece you would like on?" ,"What column is the Piece you would like on?" };
             PromptSpace = new string[] { "What row is the space you would like to move on?", "What space is the place you would like to move on?" };
             PieceChoiceError = "Choose your own Piece!";
             PieceMovementError = "That space is not available...";
-            PawnPromotion = "Select a piece to promote too:";
+            PawnPromotion = "Select a Piece to promote too:";
             PromotionOptions = new string[] { "Knight", "Bishop", "Rook", "Queen" };
             AlmostCheck = "***Can't move piece, King will be in Check.***";
             StillInCheck = "****Take your King out of Check!****";
             InCheck = "*****King is in Check!!!*****";
         }
-
-        internal void printBoard(BoardSpace[,] board)
+        internal void PrintBoard(BoardSpace[,] board)
         {
             Console.WriteLine("     0   1   2   3   4   5   6   7  \n"
                 + "   +-------------------------------+");
@@ -51,17 +50,13 @@ namespace Chess_Project.Views
             }
             Console.WriteLine("   +-------------------------------+");
         }
-        internal void setBackgroundColor(ConsoleColor color)
-        {
-            Console.BackgroundColor = color;
-        }
         internal string PrintPlayerTurn(Player p)
         {
             return String.Format("It's {0} Turn!", p.Name);
         }
         internal string PrintWinner(string name)
         {
-            return String.Format("A winner is you, {0}!!!", name);
+            return String.Format("*****CheckMate! A winner is you, {0}!!!*****", name);
         }
     }
 }
