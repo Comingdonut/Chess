@@ -1,4 +1,5 @@
 # Chess
+Solo Project (This was done for class, but after 2 years I restarted for fun.)
 ## Description:
 A board game that requires two players to outwit each other through strategy. 
 Typically, the game uses small objects to represent a real life battlefield.
