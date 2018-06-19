@@ -1,11 +1,19 @@
 # Chess
 Solo Project (This was done for class, but after 2 years I restarted for fun.)
-## Description:
+
+## Project Objective
+The objective of this project is to create a console application in C# that represents or is similar to the game Chess.
+The code created will be used as a skelton for a GUI of the game [here](https://github.com/JamesCastrejon/Chess-User-Interface).
+
+## History
+The project was originally done about two years ago in C#.
+
+## Game Description:
 A board game that requires two players to outwit each other through strategy. 
 Typically, the game uses small objects to represent a real life battlefield.
 The board being the field of combat and the pieces being soldiers.
 
-## Objective
+## Game Objective
 The objective of the game is not to "Kill" the opponents King but to essentially "Trap" them by
 putting the enemy King in a position where they cannot escape or be saved by other opposing pieces.
 
